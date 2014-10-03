@@ -49,4 +49,4 @@ dependencies {
     wearApp project(':wear')
 }
 
-apply from: 'https://raw.github.com/twotoasters/HelloAndroidStudio/master/gradle/keystore.gradle'
+//apply from: 'https://raw.github.com/twotoasters/HelloAndroidStudio/master/gradle/keystore.gradle'

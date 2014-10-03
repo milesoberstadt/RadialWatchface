@@ -49,7 +49,7 @@ public class Watchface extends FrameLayout implements IWatchface {
     private int red = 0xFFe51c23;
     private int blue = 0xFF03a9f4;
     private int green = 0xFF8bc34a;
-    private float textAngle = 15;
+    private float textAngle = 45;
     private float textRadians = 0;
 
     public Watchface(Context context) {
@@ -84,7 +84,7 @@ public class Watchface extends FrameLayout implements IWatchface {
         mFontPaint.setColor(0xFFFFFFFF);
         mFontPaint.setTextSize(24);
 
-        textRadians = textAngle * (3.14159/180);
+        textRadians = textAngle * (float)(3.14159/180);
     }
 
 
@@ -94,6 +94,11 @@ public class Watchface extends FrameLayout implements IWatchface {
         super.onDraw(canvas);
 
         myWidth = getWidth();
+        if (myWidth > 300)
+            strokeWidth = 30.f;
+        else
+            strokeWidth = 25.f;
+
 
         RectF secondsOval = new RectF();
         RectF minutesOval = new RectF();
@@ -137,19 +142,22 @@ public class Watchface extends FrameLayout implements IWatchface {
         if (displayHours.equals("0"))
             displayHours = "12";
 
+        //The math for horizontal offset is r * cos(t) where r is radius and t is radians
+        float secondsXOffset = (float) ((secondsOval.width()/2)*Math.cos(textRadians));
+        float minutesXOffset = (float) ((minutesOval.width()/2)*Math.cos(textRadians));
+        float hoursXOffset = (float) ((hoursOval.width()/2)*Math.cos(textRadians));
+
         //Text draws differ based on device size...
         if (myWidth>=320){
-            //Let's try to calculate the hours position...
-            float hoursXOffset = (float) ((hoursOval.width()/2)*Math.cos(0.785)); //45 to radians
-            canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, 30, 10, mFontPaint);
-            canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, 65, 10, mFontPaint);
+            canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
+            canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontPaint);
             canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 10, mFontPaint);
         }
         else {
             mFontPaint.setTextSize(20);
-            canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, 10, 10, mFontPaint);
-            canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, 42, 10, mFontPaint);
-            canvas.drawTextOnPath(displayHours, hoursLabelPath, 70, 10, mFontPaint);
+            canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontPaint);
+            canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 5, mFontPaint);
+            canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 5, mFontPaint);
         }
 
     }
