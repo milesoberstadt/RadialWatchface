@@ -7,18 +7,14 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import com.twotoasters.watchface.gears.widget.IWatchface;
 import com.twotoasters.watchface.gears.widget.Watch;
-import com.milesoberstadt.radialwatchface.R;
 
 import java.util.Calendar;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
@@ -46,9 +42,9 @@ public class Watchface extends FrameLayout implements IWatchface {
     private Paint mFontPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float strokeWidth = 30.f;
     private int myWidth = -1;
-    private int red = 0xFFe51c23;
-    private int blue = 0xFF03a9f4;
-    private int green = 0xFF8bc34a;
+    private int color1 = 0xFFe51c23;
+    private int color2 = 0xFF03a9f4;
+    private int color3 = 0xFF8bc34a;
     private float textAngle = 45;
     private float textRadians = 0;
 
@@ -130,11 +126,11 @@ public class Watchface extends FrameLayout implements IWatchface {
         hoursLabelPath.addArc(hoursOval, -90, 90);
 
         //Draw our colored radians after setting the color...
-        mArcPaint.setColor(blue); //0xFF109618
+        mArcPaint.setColor(color2); //0xFF109618
         canvas.drawPath(secondsPath,mArcPaint);
-        mArcPaint.setColor(green); //0xFF3366cc
+        mArcPaint.setColor(color3); //0xFF3366cc
         canvas.drawPath(minutesPath,mArcPaint);
-        mArcPaint.setColor(red); //0xFFdc3912
+        mArcPaint.setColor(color1); //0xFFdc3912
         canvas.drawPath(hoursPath, mArcPaint);
 
         //We want 12:00 to actually display at 12, so let's do that
