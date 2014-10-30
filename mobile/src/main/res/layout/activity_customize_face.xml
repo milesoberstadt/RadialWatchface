@@ -22,31 +22,6 @@
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"/>
 
-
-    <!--<com.milesoberstadt.radialwatchface.CustomDrawableView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/custom_thing"
-        android:layout_below ="@+id/colorTextView"/>
-
-    <com.milesoberstadt.radialwatchface.WatchDrawableView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/watchView"
-        android:layout_below="@+id/custom_thing"
-        />
-
-
-
-    <com.milesoberstadt.radialwatchface.WatchDrawableView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/watchView2"
-        app:hour_color="#ffffeb3b"
-        app:minute_color="#ff18ffff"
-        app:second_color="#ff9c27b0"
-        android:layout_below="@+id/watchView"
-        />!-->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -77,31 +52,6 @@
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"/>
-    <!--<HorizontalScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/colorTextView"
-        android:id="@+id/facesHScroller">
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/facesContainer"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/watchView2"
-                app:hour_color="#ffffeb3b"
-                app:minute_color="#ff18ffff"
-                app:second_color="#ff9c27b0"/>
-            <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                />
-        </LinearLayout>
-    </HorizontalScrollView>!-->
 
     <TextView
         android:layout_width="fill_parent"
