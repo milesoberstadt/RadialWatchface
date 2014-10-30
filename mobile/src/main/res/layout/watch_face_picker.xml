@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    s <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scrollView" >
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:id="@+id/watchFaceHolder">
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                    <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/watch_rgb"/>
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/watch_rgb"/>
+                </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                    <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:hour_color="#ffffeb3b"
+                        app:minute_color="#ff18ffff"
+                        app:second_color="#ff9c27b0"
+                        android:id="@+id/watch_cmy"/>
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/watch_cmy"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                    <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:hour_color="#ff8FC269"
+                        app:minute_color="#ffFCD96C"
+                        app:second_color="#ffFC745F"
+                        android:id="@+id/watch_crayon"/>
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/watch_crayon"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                    <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:hour_color="#ff444444"
+                        app:minute_color="#ff888888"
+                        app:second_color="#ffdddddd"
+                        android:id="@+id/watch_gray"/>
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/watch_gray"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                    <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:hour_color="#ff76D6D2"
+                        app:minute_color="#ffF9E270"
+                        app:second_color="#ffEF6F56"
+                        android:id="@+id/watch_pastels"/>
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/watch_pastels"/>
+            </LinearLayout>
+
+        </LinearLayout>
+        </ScrollView>
+
+</LinearLayout>

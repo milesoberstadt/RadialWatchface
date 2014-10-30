@@ -1,0 +1,11 @@
+<resources>
+        <string name="title_activity_customize_face">CustomizeFaceActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="app_name">Radial Watch Face</string>
+    <string name="watch_color_header">Watch Color Scheme</string>
+    <string name="set_degrees">Set Text Angle</string>
+    <string name="set_face">Change Face</string>
+
+</resources>

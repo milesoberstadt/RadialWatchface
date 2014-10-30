@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.milesoberstadt.radialwatchface"
-    android:versionCode="1"
+    android:versionCode="2"
     android:versionName="1.0.0">
 
     <uses-feature android:name="android.hardware.type.watch" />
@@ -10,6 +10,7 @@
     <application
         android:label="${appName}"
         android:name=".WatchfaceApp">
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
         <activity
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
             android:name=".activity.WatchfaceActivity"

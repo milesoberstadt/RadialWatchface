@@ -1,24 +1,43 @@
 package com.milesoberstadt.radialwatchface.widget;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.FrameLayout;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataItemAsset;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Wearable;
 import com.twotoasters.watchface.gears.widget.IWatchface;
 import com.twotoasters.watchface.gears.widget.Watch;
 
 import java.util.Calendar;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
-public class Watchface extends FrameLayout implements IWatchface {
+public class Watchface extends FrameLayout implements IWatchface, MessageApi.MessageListener,
+        DataApi.DataListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     /*@InjectView(R.id.face)              ImageView face;
     @InjectView(R.id.shadow_overlay)    ImageView shadowOverlay;
@@ -48,6 +67,13 @@ public class Watchface extends FrameLayout implements IWatchface {
     private float textAngle = 45;
     private float textRadians = 0;
 
+    private String TAG = "LOLTEST";
+
+    protected SharedPreferences settings;
+    protected SharedPreferences.Editor editor;
+
+    private GoogleApiClient mGoogleApiClient;
+
     public Watchface(Context context) {
         super(context);
         init(context, null, 0);
@@ -65,10 +91,41 @@ public class Watchface extends FrameLayout implements IWatchface {
 
     @DebugLog
     private void init(Context context, AttributeSet attrs, int defStyle) {
+        Log.d(TAG, "init called");
         mWatch = new Watch(this);
         setWillNotDraw(false);
 
         setupDrawObjects();
+
+
+        mGoogleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        try {
+            mGoogleApiClient.connect();
+        }
+        catch (Exception e){
+            Log.d(TAG, e.getMessage());
+        }
+
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
+        editor = settings.edit();
+        //Get specific prefs, with defaults
+        int tmp1 = settings.getInt("ringColor1", -1);
+        int tmp2 = settings.getInt("ringColor2", -1);
+        int tmp3 = settings.getInt("ringColor3", -1);
+
+        if (tmp1 != -1){
+            color1 = tmp1;
+            Log.d(TAG, "Color 1 was applied from settings");
+        }
+        if (tmp2 != -1)
+            color2 = tmp2;
+        if (tmp3 != -1)
+            color3 = tmp3;
     }
 
     private void setupDrawObjects(){
@@ -86,6 +143,7 @@ public class Watchface extends FrameLayout implements IWatchface {
 
     @Override
     protected void onDraw(Canvas canvas){
+
         Timber.v("onDraw()");
         super.onDraw(canvas);
 
@@ -239,5 +297,68 @@ public class Watchface extends FrameLayout implements IWatchface {
     private Typeface loadTypeface(int typefaceNameResId) {
         String typefaceName = getResources().getString(typefaceNameResId);
         return Typeface.createFromAsset(getContext().getAssets(), typefaceName);
+    }
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+        Log.d(TAG, messageEvent.toString());
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Connected to Google Api Service");
+        }
+        Wearable.DataApi.addListener(mGoogleApiClient, this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+
+        int c1 = -1, c2 = -1, c3 = -1;
+
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == DataEvent.TYPE_DELETED) {
+                Log.d(TAG, "DataItem deleted: " + event.getDataItem().getUri());
+            } else if (event.getType() == DataEvent.TYPE_CHANGED) {
+                Log.d(TAG, "DataItem changed: " + event.getDataItem().getUri());
+                DataItem di = event.getDataItem();
+                byte[] diBytes = di.getData();
+                DataMap dm =  DataMap.fromByteArray(diBytes);
+
+                //For some reason, we're receiving these in the incorrect order...we need to fix that
+                //TODO: Figure out what's wrong with this order
+                if (dm.containsKey("color1"))
+                    c1 = Color.parseColor(dm.getString("color1"));
+                if (dm.containsKey("color2"))
+                    c3 = Color.parseColor(dm.getString("color2"));
+                if (dm.containsKey("color3"))
+                    c2 = Color.parseColor(dm.getString("color3"));
+            }
+        }
+
+        if (c1 != -1 && c2 != -1 && c3 != -1){
+            settings = PreferenceManager.getDefaultSharedPreferences(getContext());
+            editor = settings.edit();
+
+            editor.putInt("ringColor1", c1);
+            editor.putInt("ringColor2", c2);
+            editor.putInt("ringColor3", c3);
+            editor.apply();
+
+            color1 = c1;
+            color2 = c2;
+            color3 = c3;
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 }

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Names for color sets !-->
+    <string name="watch_rgb">RGB</string>
+    <string name="watch_cmy">CMY</string>
+    <string name="watch_crayon">Crayons</string>
+    <string name="watch_gray">Grayscale</string>
+    <string name="watch_pastels">Pastels</string>
+
+    <string name="rgb1">#FFe51c23</string>
+    <string name="rgb2">#FF8bc34a</string>
+    <string name="rgb3">#FF03a9f4</string>
+
+    <string name="cmy1">#ffffeb3b</string>
+    <string name="cmy2">#ff18ffff</string>
+    <string name="cmy3">#ff9c27b0</string>
+
+    <string name="crayon1">#ff8FC269</string>
+    <string name="crayon2">#ffFCD96C</string>
+    <string name="crayon3">#ffFC745F</string>
+
+    <string name="gray1">#ff444444</string>
+    <string name="gray2">#ff888888</string>
+    <string name="gray3">#ffdddddd</string>
+
+    <string name="pastels1">#ff76D6D2</string>
+    <string name="pastels2">#ffF9E270</string>
+    <string name="pastels3">#ffEF6F56</string>
+
+    <string-array
+        name="watch_rgb_array">
+        <item>@string/rgb1</item>
+        <item>@string/rgb2</item>
+        <item>@string/rgb3</item>
+    </string-array>
+
+    <string-array
+        name="watch_cmy_array">
+        <item>@string/cmy1</item>
+        <item>@string/cmy2</item>
+        <item>@string/cmy3</item>
+    </string-array>
+
+    <string-array
+        name="watch_crayon_array">
+        <item>@string/crayon1</item>
+        <item>@string/crayon2</item>
+        <item>@string/crayon3</item>
+    </string-array>
+
+    <string-array
+        name="watch_gray_array">
+        <item>@string/gray1</item>
+        <item>@string/gray2</item>
+        <item>@string/gray3</item>
+    </string-array>
+
+    <string-array
+        name="watch_pastels_array">
+        <item>@string/pastels1</item>
+        <item>@string/pastels2</item>
+        <item>@string/pastels3</item>
+    </string-array>
+
+</resources>
