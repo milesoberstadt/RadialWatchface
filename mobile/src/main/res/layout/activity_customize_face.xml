@@ -48,7 +48,13 @@
         android:text="@string/set_face"
         android:id="@+id/changeFaceButton"/>
 
-    <View
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/set_custom"
+        android:id="@+id/changeCustomFace"/>
+
+    <!--<View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"/>
@@ -58,7 +64,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/set_degrees"
-        android:id="@+id/DegreeTextView"/>
+        android:id="@+id/DegreeTextView"/>!-->
 
 
 </LinearLayout>

@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.chiralcode.colorpicker.ColorPickerDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -38,6 +39,7 @@ public class CustomizeFaceActivity extends Activity {
     private TextView watchLabel;
 
     private Button pickFaceButton;
+    private Button pickCustomButton;
 
     private final Context context = this;
 
@@ -47,6 +49,11 @@ public class CustomizeFaceActivity extends Activity {
     private int ringColor1 = -1;
     private int ringColor2 = -1;
     private int ringColor3 = -1;
+
+    //This is for tracking our dialog position when setting up a custom watch face...
+    private int customChooserPosition = 0;
+    //Custom colors...
+    private int[] customColors = new int[3];
 
     //Time stuff...
     private Handler graphicsUpdateHandler = new Handler();
@@ -119,44 +126,7 @@ public class CustomizeFaceActivity extends Activity {
 
             if (colors.length == 3){
 
-                ringColor1 = Color.parseColor(colors[0]);
-                ringColor2 = Color.parseColor(colors[1]);
-                ringColor3 = Color.parseColor(colors[2]);
-
-                watchView.color1 = ringColor1;
-                watchView.color2 = ringColor2;
-                watchView.color3 = ringColor3;
-
-                PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
-                dataMap.getDataMap().putString("color1", colors[0]);
-                dataMap.getDataMap().putString("color2", colors[1]);
-                dataMap.getDataMap().putString("color3", colors[2]);
-                PutDataRequest request = dataMap.asPutDataRequest();
-                PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
-                        .putDataItem(mGoogleApiClient, request);
-
-                pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-                    @Override
-                    public void onResult(DataApi.DataItemResult dataItemResult) {
-                        if (dataItemResult.getStatus().isSuccess()) {
-                            Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
-                        }
-                        else
-                            Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
-                    }
-                });
-
-                editor = settings.edit();
-
-                int c1 = Color.parseColor(colors[0]);
-                int c2 = Color.parseColor(colors[1]);
-                int c3 = Color.parseColor(colors[2]);
-
-                editor.putInt("ringColor1", c1);
-                editor.putInt("ringColor2", c2);
-                editor.putInt("ringColor3", c3);
-                editor.putString("watchFaceCombo", displayName);
-                editor.apply();
+                commitColors(colors[0],colors[1],colors[2], displayName);
 
                 watchFaceCombo = displayName;
                 watchLabel.setText("Current Face: "+watchFaceCombo);
@@ -165,6 +135,49 @@ public class CustomizeFaceActivity extends Activity {
             alertDialog.dismiss();
         }
     };
+
+    private void commitColors(String col1, String col2, String col3, String displayName){
+
+        ringColor1 = Color.parseColor(col1);
+        ringColor2 = Color.parseColor(col2);
+        ringColor3 = Color.parseColor(col3);
+
+        watchView.color1 = ringColor1;
+        watchView.color2 = ringColor2;
+        watchView.color3 = ringColor3;
+
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
+        dataMap.getDataMap().putString("color1", col1);
+        dataMap.getDataMap().putString("color2", col2);
+        dataMap.getDataMap().putString("color3", col3);
+        PutDataRequest request = dataMap.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
+                .putDataItem(mGoogleApiClient, request);
+
+        pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+            @Override
+            public void onResult(DataApi.DataItemResult dataItemResult) {
+                if (dataItemResult.getStatus().isSuccess()) {
+                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
+                }
+                else
+                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
+            }
+        });
+
+        editor = settings.edit();
+
+        int c1 = Color.parseColor(col1);
+        int c2 = Color.parseColor(col2);
+        int c3 = Color.parseColor(col3);
+
+        editor.putInt("ringColor1", c1);
+        editor.putInt("ringColor2", c2);
+        editor.putInt("ringColor3", c3);
+        editor.putString("watchFaceCombo", displayName);
+        editor.apply();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,9 +192,10 @@ public class CustomizeFaceActivity extends Activity {
         //Let's try to do resources
         Resources res = getResources();
 
-        int tmp1 = settings.getInt("ringColor1", -1);
-        int tmp2 = settings.getInt("ringColor2", -1);
-        int tmp3 = settings.getInt("ringColor3", -1);
+        //If we don't have settings, set to RGB
+        int tmp1 = settings.getInt("ringColor1", 0xFFe51c23);
+        int tmp2 = settings.getInt("ringColor2", 0xFF8bc34a);
+        int tmp3 = settings.getInt("ringColor3", 0xFF03a9f4);
 
         if (tmp1 != -1)
             ringColor1 = tmp1;
@@ -194,6 +208,7 @@ public class CustomizeFaceActivity extends Activity {
         watchLabel = (TextView) findViewById(R.id.watchFaceText);
         watchLabel.setText("Current Face: "+watchFaceCombo);
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
+        pickCustomButton = (Button) findViewById(R.id.changeCustomFace);
 
         graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
 
@@ -245,6 +260,14 @@ public class CustomizeFaceActivity extends Activity {
 
             }
         });
+
+        pickCustomButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                showColorPicker();
+            }
+
+        });
     }
 
 
@@ -291,5 +314,123 @@ public class CustomizeFaceActivity extends Activity {
         mGoogleApiClient.disconnect();
         super.onStop();
     }
+
+    private void showColorPicker(){
+
+        int initialColor = 0xFF000000;
+        String title = "";
+
+        if (customChooserPosition == 0){
+            initialColor = ringColor1;
+            title = "Choose Hour Color...";
+        }
+        else if (customChooserPosition == 1){
+            initialColor = ringColor2;
+            title = "Choose Minute Color...";
+        }
+        else if (customChooserPosition == 2){
+            initialColor = ringColor3;
+            title = "Choose Second Color...";
+        }
+
+        final ColorPickerDialog colorPickerDialog = new ColorPickerDialog(this, initialColor, new ColorPickerDialog.OnColorSelectedListener() {
+
+            @Override
+            public void onColorSelected(int color) {
+                if (customChooserPosition < 2){
+                    customColors[customChooserPosition] = color;
+                    customChooserPosition++;
+                    //if (colorPickerDialog)
+                    //colorPickerDialog.dismiss();
+                    showColorPicker();
+                }
+                else if (customChooserPosition == 2){
+                    customColors[customChooserPosition] = color;
+
+                    String col1 = String.format("#%06X", (0xFFFFFF & customColors[0]));
+                    String col2 = String.format("#%06X", (0xFFFFFF & customColors[1]));
+                    String col3 = String.format("#%06X", (0xFFFFFF & customColors[2]));
+
+                    commitColors(col1, col2, col3, "Custom");
+
+                    watchFaceCombo = "Custom";
+                    watchLabel.setText("Current Face: "+watchFaceCombo);
+
+                    customChooserPosition = 0;
+                    //colorPickerDialog.dismiss();
+                }
+            }
+
+        });
+
+
+        colorPickerDialog.setTitle(title);
+
+        Resources res = getResources();
+
+        if (customChooserPosition > 0){
+            colorPickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, res.getString(R.string.previous), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    customChooserPosition--;
+                    colorPickerDialog.dismiss();
+                    showColorPicker();
+                }
+            });
+        }
+
+        /*if (customChooserPosition < 2){
+            colorPickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, res.getString(R.string.next), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    customColors[customChooserPosition] = colorPickerDialog.hashCode();
+                    customChooserPosition++;
+                    colorPickerDialog.dismiss();
+                    showColorPicker();
+                }
+            });
+        }
+
+        if (customChooserPosition == 2){
+            colorPickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, res.getString(R.string.done), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    customColors[customChooserPosition] = colorPickerDialog.hashCode();
+
+                    String col1 = String.format("#%06X", (0xFFFFFF & customColors[0]));
+                    col1 = String.format("#%08X", customColors[0]);
+                    String col2 = String.format("#%06X", (0xFFFFFF & customColors[1]));
+                    String col3 = String.format("#%06X", (0xFFFFFF & customColors[2]));
+
+                    commitColors(col1, col2, col3, "Custom");
+
+                    watchFaceCombo = "Custom";
+                    watchLabel.setText("Current Face: "+watchFaceCombo);
+
+                    customChooserPosition = 0;
+                    colorPickerDialog.dismiss();
+                }
+            });
+        }*/
+
+        colorPickerDialog.show();
+
+
+        /*AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater inflater = getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.watch_face_picker, null));
+        builder.setTitle(R.string.set_face);
+
+        alertDialog = builder.create();
+        alertDialog.show();
+
+        LinearLayout watchHolder = (LinearLayout) alertDialog.findViewById(R.id.watchFaceHolder);
+        int watchCount = watchHolder.getChildCount();
+
+        for (int i=0;i<watchCount; i++){
+            ((LinearLayout) watchHolder.getChildAt(i)).setOnClickListener(watchClicked);
+        }*/
+    }
+
 
 }
