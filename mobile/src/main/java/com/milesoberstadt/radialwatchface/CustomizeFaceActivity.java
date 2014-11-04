@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.chiralcode.colorpicker.ColorPickerDialog;
@@ -41,14 +42,17 @@ public class CustomizeFaceActivity extends Activity {
     private Button pickFaceButton;
     private Button pickCustomButton;
 
+    private Switch textSwitch, invertSwitch, strokeSwitch;
+
+
     private final Context context = this;
 
     private AlertDialog alertDialog = null;
 
+    //Settings get stored to these
     private String watchFaceCombo = "";
-    private int ringColor1 = -1;
-    private int ringColor2 = -1;
-    private int ringColor3 = -1;
+    private int ringColor1 = -1, ringColor2 = -1, ringColor3 = -1;
+    private boolean bTextEnabled = true, bInvertText = false, bTextStroke = false;
 
     //This is for tracking our dialog position when setting up a custom watch face...
     private int customChooserPosition = 0;
@@ -178,6 +182,25 @@ public class CustomizeFaceActivity extends Activity {
         editor.apply();
     }
 
+    private void syncBoolean(String path, String boolName, boolean value){
+        PutDataMapRequest dataMap = PutDataMapRequest.create(path);
+        dataMap.getDataMap().putBoolean(boolName, value);
+        PutDataRequest request = dataMap.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
+                .putDataItem(mGoogleApiClient, request);
+
+        pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+            @Override
+            public void onResult(DataApi.DataItemResult dataItemResult) {
+                if (dataItemResult.getStatus().isSuccess()) {
+                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
+                }
+                else
+                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
+            }
+        });
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -204,20 +227,35 @@ public class CustomizeFaceActivity extends Activity {
         if (tmp3 != -1)
             ringColor3 = tmp3;
 
+        //Get text options
+        bTextEnabled = settings.getBoolean("enableText", true);
+        bInvertText = settings.getBoolean("invertText", false);
+        bTextStroke = settings.getBoolean("strokeText", false);
+
         watchView = (CanvasDrawnRingView) findViewById(R.id.watchView);
         watchLabel = (TextView) findViewById(R.id.watchFaceText);
         watchLabel.setText("Current Face: "+watchFaceCombo);
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
         pickCustomButton = (Button) findViewById(R.id.changeCustomFace);
 
+        //Define switches
+        textSwitch = (Switch) findViewById(R.id.text_switch);
+        invertSwitch = (Switch) findViewById(R.id.invert_switch);
+        strokeSwitch = (Switch) findViewById(R.id.stroke_switch);
+
         graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
 
+        //If saved colors exist, update watch preview
         if (ringColor1 != -1)
             watchView.color1 = ringColor1;
         if (ringColor2 != -1)
             watchView.color2 = ringColor2;
         if (ringColor3 != -1)
             watchView.color3 = ringColor3;
+        //Update text options too...
+        watchView.bShowText = bTextEnabled;
+        watchView.bInvertText = bInvertText;
+        watchView.bStrokeText = bTextStroke;
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
@@ -267,6 +305,66 @@ public class CustomizeFaceActivity extends Activity {
                 showColorPicker();
             }
 
+        });
+
+        textSwitch.setChecked(bTextEnabled);
+        invertSwitch.setChecked(bInvertText);
+        strokeSwitch.setChecked(bTextStroke);
+
+        if (textSwitch.isChecked()){
+            invertSwitch.setEnabled(true);
+            strokeSwitch.setEnabled(true);
+        }
+        else{
+            invertSwitch.setEnabled(false);
+            strokeSwitch.setEnabled(false);
+        }
+
+        textSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("enableText", textSwitch.isChecked());
+                editor.apply();
+
+                watchView.bShowText = bTextStroke = textSwitch.isChecked();
+
+                if (textSwitch.isChecked())
+                {
+                    invertSwitch.setEnabled(true);
+                    strokeSwitch.setEnabled(true);
+                }
+
+                else{
+                    invertSwitch.setEnabled(false);
+                    strokeSwitch.setEnabled(false);
+                }
+
+                syncBoolean("/text", "enableText", textSwitch.isChecked());
+            }
+        });
+
+        invertSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("invertText", invertSwitch.isChecked());
+                editor.apply();
+
+                watchView.bInvertText = bInvertText = invertSwitch.isChecked();
+
+                syncBoolean("/text", "invertText", invertSwitch.isChecked());
+            }
+        });
+
+        strokeSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("strokeText", strokeSwitch.isChecked());
+                editor.apply();
+
+                watchView.bStrokeText = bTextStroke = strokeSwitch.isChecked();
+
+                syncBoolean("/text", "strokeText", strokeSwitch.isChecked());
+            }
         });
     }
 

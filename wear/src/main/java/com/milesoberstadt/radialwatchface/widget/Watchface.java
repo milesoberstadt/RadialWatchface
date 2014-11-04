@@ -45,6 +45,8 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
     @InjectView(R.id.hand_minute)       ImageView handMinute;
     @InjectView(R.id.hand_second)       ImageView handSecond;*/
 
+    private boolean bTextEnabled = true, bInvertText = false, bTextStroke = false;
+
     private int hours = 0;
     private int minutes = 0;
     private int seconds = 0;
@@ -59,6 +61,7 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
     //Draw stuff
     private Paint mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mFontPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mFontStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float strokeWidth = 30.f;
     private int myWidth = -1;
     private int color1 = 0xFFe51c23;
@@ -120,12 +123,17 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
 
         if (tmp1 != -1){
             color1 = tmp1;
-            Log.d(TAG, "Color 1 was applied from settings");
+            //Log.d(TAG, "Color 1 was applied from settings");
         }
         if (tmp2 != -1)
             color2 = tmp2;
         if (tmp3 != -1)
             color3 = tmp3;
+
+        //Get text options
+        bTextEnabled = settings.getBoolean("enableText", true);
+        bInvertText = settings.getBoolean("invertText", false);
+        bTextStroke = settings.getBoolean("strokeText", false);
     }
 
     private void setupDrawObjects(){
@@ -133,6 +141,10 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
         mArcPaint.setStyle(Paint.Style.STROKE);
         mArcPaint.setStrokeWidth(strokeWidth);
         mArcPaint.setStrokeCap(Paint.Cap.BUTT);
+
+        mFontStrokePaint.setStyle(Paint.Style.STROKE);
+        mFontStrokePaint.setTextSize(24);
+        mFontStrokePaint.setStrokeWidth(2);
 
         mFontPaint.setColor(0xFFFFFFFF);
         mFontPaint.setTextSize(24);
@@ -184,9 +196,9 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
         hoursLabelPath.addArc(hoursOval, -90, 90);
 
         //Draw our colored radians after setting the color...
-        mArcPaint.setColor(color2); //0xFF109618
+        mArcPaint.setColor(color3); //0xFF109618
         canvas.drawPath(secondsPath,mArcPaint);
-        mArcPaint.setColor(color3); //0xFF3366cc
+        mArcPaint.setColor(color2); //0xFF3366cc
         canvas.drawPath(minutesPath,mArcPaint);
         mArcPaint.setColor(color1); //0xFFdc3912
         canvas.drawPath(hoursPath, mArcPaint);
@@ -201,17 +213,45 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
         float minutesXOffset = (float) ((minutesOval.width()/2)*Math.cos(textRadians));
         float hoursXOffset = (float) ((hoursOval.width()/2)*Math.cos(textRadians));
 
-        //Text draws differ based on device size...
-        if (myWidth>=320){
-            canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
-            canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontPaint);
-            canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 10, mFontPaint);
+        if (bInvertText){
+            mFontPaint.setColor(0xFF000000);
         }
-        else {
-            mFontPaint.setTextSize(20);
-            canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontPaint);
-            canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 5, mFontPaint);
-            canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 5, mFontPaint);
+        else{
+            mFontPaint.setColor(0xFFFFFFFF);
+        }
+
+        if (bTextEnabled) {
+            //If we have to draw a stroke, we need another paint...
+            if (bTextStroke){
+                if (bInvertText){
+                    mFontStrokePaint.setColor(0xFFFFFFFF);
+                }
+                else{
+                    mFontStrokePaint.setColor(0xFF000000);
+                }
+                //Text draws differ based on device size...
+                if (myWidth >= 320) {
+                    canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontStrokePaint);
+                    canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontStrokePaint);
+                    canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 10, mFontStrokePaint);
+                }
+                else {
+                    canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontStrokePaint);
+                    canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 5, mFontStrokePaint);
+                    canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 5, mFontStrokePaint);
+                }
+            }
+            //Text draws differ based on device size...
+            if (myWidth >= 320) {
+                canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
+                canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontPaint);
+                canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 10, mFontPaint);
+            } else {
+                mFontPaint.setTextSize(20);
+                canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontPaint);
+                canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 5, mFontPaint);
+                canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 5, mFontPaint);
+            }
         }
 
     }
@@ -321,6 +361,7 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
     public void onDataChanged(DataEventBuffer dataEvents) {
 
         int c1 = -1, c2 = -1, c3 = -1;
+        boolean b1 = false, b2 = false, b3 = false;
 
         for (DataEvent event : dataEvents) {
             if (event.getType() == DataEvent.TYPE_DELETED) {
@@ -339,13 +380,30 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
                     c3 = Color.parseColor(dm.getString("color2"));
                 if (dm.containsKey("color3"))
                     c2 = Color.parseColor(dm.getString("color3"));
+
+                if (dm.containsKey("enableText")){
+                    b1 = true;
+                    bTextEnabled = dm.getBoolean("enableText");
+                }
+                if (dm.containsKey("invertText")){
+                    b2 = true;
+                    bInvertText = dm.getBoolean("invertText");
+                }
+                if (dm.containsKey("strokeText")){
+                    b3 = true;
+                    bTextStroke = dm.getBoolean("strokeText");
+                }
+
             }
         }
 
-        if (c1 != -1 && c2 != -1 && c3 != -1){
+        //If we have anything to save, make sure stuff is ready...
+        if ((c1 != -1 && c2 != -1 && c3 != -1) || (b1 || b2 || b3)){
             settings = PreferenceManager.getDefaultSharedPreferences(getContext());
             editor = settings.edit();
+        }
 
+        if (c1 != -1 && c2 != -1 && c3 != -1){
             editor.putInt("ringColor1", c1);
             editor.putInt("ringColor2", c2);
             editor.putInt("ringColor3", c3);
@@ -354,6 +412,16 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
             color1 = c1;
             color2 = c2;
             color3 = c3;
+        }
+
+        if (b1 || b2 || b3){
+            if (b1)
+                editor.putBoolean("enableText", bTextEnabled);
+            if (b2)
+                editor.putBoolean("invertText", bInvertText);
+            if (b3)
+                editor.putBoolean("strokeText", bTextStroke);
+            editor.apply();
         }
     }
 

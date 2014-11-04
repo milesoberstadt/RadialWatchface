@@ -100,14 +100,5 @@
         </LinearLayout>
     </HorizontalScrollView>!-->
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/set_degrees"
-        android:id="@+id/DegreeTextView"
-        android:layout_below="@id/changeFaceButton"/>
-
 
 </RelativeLayout>

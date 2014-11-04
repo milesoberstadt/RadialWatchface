@@ -15,6 +15,12 @@ import java.util.Calendar;
  * Created by Miles on 10/13/2014.
  */
 public class CanvasDrawnRingView extends View{
+    public int color1 = 0xFFe51c23;
+    public int color2 = 0xFF8bc34a;
+    public int color3 = 0xFF03a9f4;
+    public boolean bShowText = true;
+    public boolean bInvertText = false;
+    public boolean bStrokeText = false;
 
     private int hours = 0;
     private int minutes = 0;
@@ -27,6 +33,7 @@ public class CanvasDrawnRingView extends View{
     //Draw stuff
     private Paint mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mFontPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mFontStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private RectF secondsOval = new RectF();
     private RectF minutesOval = new RectF();
@@ -43,9 +50,6 @@ public class CanvasDrawnRingView extends View{
 
     private float strokeWidth = 30.f;
     private int myWidth = 320;
-    public int color1 = 0xFFe51c23;
-    public int color2 = 0xFF8bc34a;
-    public int color3 = 0xFF03a9f4;
     private float textAngle = 45;
     private float textRadians = 0;
 
@@ -75,6 +79,10 @@ public class CanvasDrawnRingView extends View{
 
         mFontPaint.setColor(0xFFFFFFFF);
         mFontPaint.setTextSize(24);
+
+        mFontStrokePaint.setStyle(Paint.Style.STROKE);
+        mFontStrokePaint.setTextSize(24);
+        mFontStrokePaint.setStrokeWidth(2);
 
         textRadians = textAngle * (float)(3.14159/180);
 
@@ -107,9 +115,32 @@ public class CanvasDrawnRingView extends View{
         float minutesXOffset = (float) ((minutesOval.width()/2)*Math.cos(textRadians));
         float hoursXOffset = (float) ((hoursOval.width()/2)*Math.cos(textRadians));
 
-        canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
-        canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontPaint);
-        canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 10, mFontPaint);
+        if (bInvertText){
+            mFontPaint.setColor(0xFF000000);
+        }
+        else{
+            mFontPaint.setColor(0xFFFFFFFF);
+        }
+
+
+        if (bShowText) {
+            //If we have to draw a stroke, we need another paint...
+            if (bStrokeText){
+                if (bInvertText){
+                    mFontStrokePaint.setColor(0xFFFFFFFF);
+                }
+                else{
+                    mFontStrokePaint.setColor(0xFF000000);
+                }
+                canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontStrokePaint);
+                canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontStrokePaint);
+                canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 10, mFontStrokePaint);
+            }
+            canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
+            canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontPaint);
+            canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 10, mFontPaint);
+
+        }
 
     }
 

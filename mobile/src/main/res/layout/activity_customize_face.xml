@@ -54,17 +54,36 @@
         android:text="@string/set_custom"
         android:id="@+id/changeCustomFace"/>
 
-    <!--<View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray"/>
-
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/set_degrees"
-        android:id="@+id/DegreeTextView"/>!-->
+        android:text="@string/text_options"
+        android:id="@+id/option_text_View"/>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="10dp"
+        android:background="@android:color/darker_gray"/>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/show_text"
+        android:id="@+id/text_switch" />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/invert_text"
+        android:id="@+id/invert_switch" />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_stroke"
+        android:id="@+id/stroke_switch" />
 
 
 </LinearLayout>

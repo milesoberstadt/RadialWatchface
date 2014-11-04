@@ -8,8 +8,11 @@
     <string name="done">Done</string>
     <string name="app_name">Radial Watch Face</string>
     <string name="watch_color_header">Watch Color Scheme</string>
-    <string name="set_degrees">Set Text Angle</string>
     <string name="set_face">Change Face...</string>
     <string name="set_custom">Set Custom Scheme...</string>
 
+    <string name="text_options">Text Options</string>
+    <string name="show_text">Show Text</string>
+    <string name="invert_text">Invert Text Colors</string>
+    <string name="text_stroke">Add Stroke To Text</string>
 </resources>
