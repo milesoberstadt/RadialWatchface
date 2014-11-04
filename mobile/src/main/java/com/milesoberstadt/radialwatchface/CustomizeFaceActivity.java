@@ -149,6 +149,8 @@ public class CustomizeFaceActivity extends Activity {
         watchView.color1 = ringColor1;
         watchView.color2 = ringColor2;
         watchView.color3 = ringColor3;
+        //Disable this feature until it's ready for primetime
+        watchView.bShowMilli = false;
 
         PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
         dataMap.getDataMap().putString("color1", col1);
