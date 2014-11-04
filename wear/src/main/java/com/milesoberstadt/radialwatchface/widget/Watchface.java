@@ -197,7 +197,9 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
 
         //Draw our colored radians after setting the color...
         mArcPaint.setColor(color3); //0xFF109618
-        canvas.drawPath(secondsPath,mArcPaint);
+        //Only draw our seconds path when we're active...
+        if (this.mActive)
+            canvas.drawPath(secondsPath,mArcPaint);
         mArcPaint.setColor(color2); //0xFF3366cc
         canvas.drawPath(minutesPath,mArcPaint);
         mArcPaint.setColor(color1); //0xFFdc3912
@@ -231,24 +233,28 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
                 }
                 //Text draws differ based on device size...
                 if (myWidth >= 320) {
-                    canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontStrokePaint);
+                    if (this.mActive)
+                        canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontStrokePaint);
                     canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontStrokePaint);
                     canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 10, mFontStrokePaint);
                 }
                 else {
-                    canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontStrokePaint);
+                    if (this.mActive)
+                       canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontStrokePaint);
                     canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 5, mFontStrokePaint);
                     canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 5, mFontStrokePaint);
                 }
             }
             //Text draws differ based on device size...
             if (myWidth >= 320) {
-                canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
+                if (this.mActive)
+                    canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
                 canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontPaint);
                 canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 10, mFontPaint);
             } else {
                 mFontPaint.setTextSize(20);
-                canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontPaint);
+                if (this.mActive)
+                    canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 5, mFontPaint);
                 canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 5, mFontPaint);
                 canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 5, mFontPaint);
             }
