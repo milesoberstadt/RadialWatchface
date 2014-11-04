@@ -65,8 +65,8 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
     private float strokeWidth = 30.f;
     private int myWidth = -1;
     private int color1 = 0xFFe51c23;
-    private int color2 = 0xFF03a9f4;
-    private int color3 = 0xFF8bc34a;
+    private int color2 = 0xFF8bc34a;
+    private int color3 = 0xFF03a9f4;
     private float textAngle = 45;
     private float textRadians = 0;
 
@@ -372,14 +372,12 @@ public class Watchface extends FrameLayout implements IWatchface, MessageApi.Mes
                 byte[] diBytes = di.getData();
                 DataMap dm =  DataMap.fromByteArray(diBytes);
 
-                //For some reason, we're receiving these in the incorrect order...we need to fix that
-                //TODO: Figure out what's wrong with this order
                 if (dm.containsKey("color1"))
                     c1 = Color.parseColor(dm.getString("color1"));
                 if (dm.containsKey("color2"))
-                    c3 = Color.parseColor(dm.getString("color2"));
+                    c2 = Color.parseColor(dm.getString("color2"));
                 if (dm.containsKey("color3"))
-                    c2 = Color.parseColor(dm.getString("color3"));
+                    c3 = Color.parseColor(dm.getString("color3"));
 
                 if (dm.containsKey("enableText")){
                     b1 = true;
