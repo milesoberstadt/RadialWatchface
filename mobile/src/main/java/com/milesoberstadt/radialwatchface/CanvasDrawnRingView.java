@@ -19,6 +19,7 @@ public class CanvasDrawnRingView extends View{
     public int color2 = 0xFF8bc34a;
     public int color3 = 0xFF03a9f4;
     public boolean bShowText = true;
+    public boolean b24HourTime = false;
     public boolean bInvertText = false;
     public boolean bStrokeText = false;
 
@@ -102,6 +103,7 @@ public class CanvasDrawnRingView extends View{
 
     protected void onDraw(Canvas canvas){
 
+        //TODO: Update preview for 24-hour time compatibility
         //Draw our colored radians after setting the color...
         mArcPaint.setColor(color3); //0xFF109618
         canvas.drawPath(secondsPath,mArcPaint);
@@ -122,6 +124,13 @@ public class CanvasDrawnRingView extends View{
             mFontPaint.setColor(0xFFFFFFFF);
         }
 
+        //Format our hours for military or not here
+        int hoursFormatted = hours;
+        if (!b24HourTime) {
+            hoursFormatted = hours % 12;
+        }
+        if (hoursFormatted == 0)
+            hoursFormatted = 12;
 
         if (bShowText) {
             //If we have to draw a stroke, we need another paint...
@@ -134,11 +143,11 @@ public class CanvasDrawnRingView extends View{
                 }
                 canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontStrokePaint);
                 canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontStrokePaint);
-                canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 10, mFontStrokePaint);
+                canvas.drawTextOnPath(String.valueOf(hoursFormatted), hoursLabelPath, hoursXOffset, 10, mFontStrokePaint);
             }
             canvas.drawTextOnPath(String.valueOf(seconds), secondsLabelPath, secondsXOffset, 10, mFontPaint);
             canvas.drawTextOnPath(String.valueOf(minutes), minutesLabelPath, minutesXOffset, 10, mFontPaint);
-            canvas.drawTextOnPath(String.valueOf(hours), hoursLabelPath, hoursXOffset, 10, mFontPaint);
+            canvas.drawTextOnPath(String.valueOf(hoursFormatted), hoursLabelPath, hoursXOffset, 10, mFontPaint);
 
         }
 
@@ -160,14 +169,10 @@ public class CanvasDrawnRingView extends View{
         //Initial time vals
         time = Calendar.getInstance();
 
-        int hr = time.get(Calendar.HOUR_OF_DAY) % 12;
+        int hr = time.get(Calendar.HOUR_OF_DAY);
         int min = time.get(Calendar.MINUTE);
         int sec = time.get(Calendar.SECOND);
         int ms = time.get(Calendar.MILLISECOND);
-
-        //We want hr to be 12 instead of 0
-        if (hr == 0)
-            hr = 12;
 
         hours = hr;
         minutes = min;
@@ -193,7 +198,10 @@ public class CanvasDrawnRingView extends View{
         minutesPath.addArc(minutesOval, -90, 6 * minutes);
 
         hoursPath = new Path();
-        float hourSize = 30 * hours;
+        int drawHours = hours % 12;
+        if (drawHours == 0)
+            drawHours = 12;
+        float hourSize = 30 * drawHours;
         //This adds the percentage of the the current hour to our hour radian's size
         if (bHourAddMinutes)
             hourSize += 0.5f * minutes;

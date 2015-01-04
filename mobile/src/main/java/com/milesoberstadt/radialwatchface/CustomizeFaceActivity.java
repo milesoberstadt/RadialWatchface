@@ -12,8 +12,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -26,12 +24,16 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 
-public class CustomizeFaceActivity extends Activity {
+public class CustomizeFaceActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<DataApi.DataItemResult> {
 
     protected SharedPreferences settings;
     protected SharedPreferences.Editor editor;
@@ -42,7 +44,7 @@ public class CustomizeFaceActivity extends Activity {
     private Button pickFaceButton;
     private Button pickCustomButton;
 
-    private Switch textSwitch, invertSwitch, strokeSwitch;
+    private Switch textSwitch, militarySwitch, invertSwitch, strokeSwitch, smoothSwitch, graySwitch;
 
 
     private final Context context = this;
@@ -52,7 +54,7 @@ public class CustomizeFaceActivity extends Activity {
     //Settings get stored to these
     private String watchFaceCombo = "";
     private int ringColor1 = -1, ringColor2 = -1, ringColor3 = -1;
-    private boolean bTextEnabled = true, bInvertText = false, bTextStroke = false;
+    private boolean bTextEnabled = true, b24HourTime = false, bInvertText = false, bTextStroke = false, bSmoothAnimations = false, bGrayAmbient = false;
 
     //This is for tracking our dialog position when setting up a custom watch face...
     private int customChooserPosition = 0;
@@ -67,9 +69,6 @@ public class CustomizeFaceActivity extends Activity {
             watchView.updateSystemTime();
             watchView.updateShapes();
 
-            //watchView2.updateSystemTime();
-            //watchView2.updateShapes();
-
             if (watchView.bShowMilli)
                 graphicsUpdateHandler.postDelayed(this, (1000/60)); //Desired framerate is 60fps
             else
@@ -80,6 +79,8 @@ public class CustomizeFaceActivity extends Activity {
     private String TAG = "LOLTEST";
 
     private GoogleApiClient mGoogleApiClient = null;
+    private String mPeerId;
+    private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
 
     private View.OnClickListener watchClicked = new View.OnClickListener() {
         @Override
@@ -209,6 +210,10 @@ public class CustomizeFaceActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customize_face);
 
+        Log.d(TAG, "onCreate");
+
+        //TODO: Migrate all setting strings to @string vals
+
         //Get our saved prefs
         settings = PreferenceManager.getDefaultSharedPreferences(this);
         editor = settings.edit();
@@ -231,8 +236,11 @@ public class CustomizeFaceActivity extends Activity {
 
         //Get text options
         bTextEnabled = settings.getBoolean("enableText", true);
+        b24HourTime = settings.getBoolean("24hourtime", false);
         bInvertText = settings.getBoolean("invertText", false);
         bTextStroke = settings.getBoolean("strokeText", false);
+        bSmoothAnimations = settings.getBoolean("smoothAnim", false);
+        bGrayAmbient = settings.getBoolean("grayAmbient", false);
 
         watchView = (CanvasDrawnRingView) findViewById(R.id.watchView);
         watchLabel = (TextView) findViewById(R.id.watchFaceText);
@@ -242,8 +250,11 @@ public class CustomizeFaceActivity extends Activity {
 
         //Define switches
         textSwitch = (Switch) findViewById(R.id.text_switch);
+        militarySwitch = (Switch) findViewById(R.id.military_switch);
         invertSwitch = (Switch) findViewById(R.id.invert_switch);
         strokeSwitch = (Switch) findViewById(R.id.stroke_switch);
+        smoothSwitch = (Switch) findViewById(R.id.smooth_switch);
+        graySwitch = (Switch) findViewById(R.id.gray_switch);
 
         graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
 
@@ -258,25 +269,12 @@ public class CustomizeFaceActivity extends Activity {
         watchView.bShowText = bTextEnabled;
         watchView.bInvertText = bInvertText;
         watchView.bStrokeText = bTextStroke;
+        watchView.bShowMilli = bSmoothAnimations;
+        watchView.b24HourTime = b24HourTime;
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(Bundle connectionHint) {
-                        Log.d(TAG, "onConnected: " + connectionHint);
-                        // Now you can use the data layer API
-                    }
-                    @Override
-                    public void onConnectionSuspended(int cause) {
-                        Log.d(TAG, "onConnectionSuspended: " + cause);
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(ConnectionResult result) {
-                        Log.d(TAG, "onConnectionFailed: " + result);
-                    }
-                })
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .addApi(Wearable.API)
                 .build();
 
@@ -310,8 +308,11 @@ public class CustomizeFaceActivity extends Activity {
         });
 
         textSwitch.setChecked(bTextEnabled);
+        militarySwitch.setChecked(b24HourTime);
         invertSwitch.setChecked(bInvertText);
         strokeSwitch.setChecked(bTextStroke);
+        smoothSwitch.setChecked(bSmoothAnimations);
+        graySwitch.setChecked(bGrayAmbient);
 
         if (textSwitch.isChecked()){
             invertSwitch.setEnabled(true);
@@ -345,6 +346,18 @@ public class CustomizeFaceActivity extends Activity {
             }
         });
 
+        militarySwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("24hourtime", militarySwitch.isChecked());
+                editor.apply();
+
+                watchView.b24HourTime = b24HourTime = militarySwitch.isChecked();
+
+                syncBoolean("/text", "24hourtime", militarySwitch.isChecked());
+            }
+        });
+
         invertSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -368,26 +381,77 @@ public class CustomizeFaceActivity extends Activity {
                 syncBoolean("/text", "strokeText", strokeSwitch.isChecked());
             }
         });
+
+        smoothSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("smoothAnim", smoothSwitch.isChecked());
+                editor.apply();
+
+                watchView.bShowMilli = bSmoothAnimations = smoothSwitch.isChecked();
+
+                syncBoolean("/anim", "smoothAnim", smoothSwitch.isChecked());
+            }
+        });
+
+        graySwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editor.putBoolean("grayAmbient", graySwitch.isChecked());
+                editor.apply();
+
+                syncBoolean("/color", "grayAmbient", graySwitch.isChecked());
+            }
+        });
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.customize_face, menu);
-        return true;
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+    protected void onStop() {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
         }
-        return super.onOptionsItemSelected(item);
+        super.onStop();
+    }
+
+    @Override // GoogleApiClient.ConnectionCallbacks
+    public void onConnected(Bundle connectionHint) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "onConnected: " + connectionHint);
+        }
+    }
+
+    @Override // ResultCallback<DataApi.DataItemResult>
+    public void onResult(DataApi.DataItemResult dataItemResult) {
+        if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
+            DataItem configDataItem = dataItemResult.getDataItem();
+            DataMapItem dataMapItem = DataMapItem.fromDataItem(configDataItem);
+            DataMap config = dataMapItem.getDataMap();
+
+        } else {
+            // If DataItem with the current config can't be retrieved, select the default items on
+            // each picker.
+
+        }
+    }
+
+    @Override // GoogleApiClient.ConnectionCallbacks
+    public void onConnectionSuspended(int cause) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "onConnectionSuspended: " + cause);
+        }
+    }
+
+    @Override // GoogleApiClient.OnConnectionFailedListener
+    public void onConnectionFailed(ConnectionResult result) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "onConnectionFailed: " + result);
+        }
     }
 
     @Override
@@ -396,23 +460,17 @@ public class CustomizeFaceActivity extends Activity {
         mGoogleApiClient.disconnect();
     }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-
-        try {
-            mGoogleApiClient.connect();
-        }
-        catch (Exception e)
-        {
-            Log.d(TAG, e.getMessage());
-        }
-    }
-
-    @Override
-    protected void onStop(){
-        mGoogleApiClient.disconnect();
-        super.onStop();
+    private void displayNoConnectedDeviceDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        String messageText = getResources().getString(R.string.title_no_device_connected);
+        String okText = getResources().getString(R.string.ok_no_device_connected);
+        builder.setMessage(messageText)
+                .setCancelable(false)
+                .setPositiveButton(okText, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) { }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void showColorPicker(){

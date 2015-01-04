@@ -10,74 +10,117 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.milesoberstadt.radialwatchface.CustomizeFaceActivity">
 
-    <TextView
+    <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/watch_color_header"
-        android:id="@+id/colorTextView"
-        style="?android:listSeparatorTextViewStyle"
-        />
+        android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:id="@+id/currentFace">
-        <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/watchView"/>
-        <TextView
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:id="@+id/watchFaceText"
-            android:text="Current Face: RGB"/>
-    </LinearLayout>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/set_face"
-        android:id="@+id/changeFaceButton"/>
+            android:orientation="vertical">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/set_custom"
-        android:id="@+id/changeCustomFace"/>
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/watch_color_header"
+                android:id="@+id/colorTextView"
+                style="?android:listSeparatorTextViewStyle"
+                />
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/text_options"
-        android:id="@+id/option_text_View"
-        style="?android:listSeparatorTextViewStyle"
-        />
-   
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/show_text"
-        android:id="@+id/text_switch" />
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:id="@+id/currentFace">
+                <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/watchView"/>
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:paddingTop="@dimen/activity_vertical_margin"
+                    android:paddingBottom="@dimen/activity_vertical_margin"
+                    android:id="@+id/watchFaceText"
+                    android:text="Current Face: RGB"/>
+            </LinearLayout>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_face"
+                android:id="@+id/changeFaceButton"/>
 
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/invert_text"
-        android:id="@+id/invert_switch" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/set_custom"
+                android:id="@+id/changeCustomFace"/>
 
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/text_stroke"
-        android:id="@+id/stroke_switch" />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/text_options"
+                android:id="@+id/option_text_View"
+                style="?android:listSeparatorTextViewStyle"
+                />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/show_text"
+                android:id="@+id/text_switch" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/military_time"
+                android:id="@+id/military_switch" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/invert_text"
+                android:id="@+id/invert_switch" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_stroke"
+                android:id="@+id/stroke_switch" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/display_options"
+                android:id="@+id/display_text_View"
+                style="?android:listSeparatorTextViewStyle"
+                />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sm_sec"
+                android:id="@+id/smooth_switch" />
+
+            <Switch
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/gray_ambient"
+                android:id="@+id/gray_switch" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
 
 
 </LinearLayout>
