@@ -278,8 +278,12 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
             if (!b24HourAltHour || !b24HourTime) {
                 hourSize = 30 * (hours % 12);
             }
-            else
-                hourSize = 30 * (hours/2);
+            else {
+                int displayHours = hours;
+                if (displayHours >= 12)
+                    displayHours -= 12;
+                hourSize = 30 * (displayHours);
+            }
             //I THINK I want to always do this...
             if (hourSize == 0)
                 hourSize = 30 * 12;
@@ -288,7 +292,7 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
             if (bHourAddMinutes)
                 hourSize += 0.5f * minutes;
             hoursPath.addArc(hoursOval, -90, (int) hourSize);
-
+ 
             //These are our text radian paths, nice and long so our text will display correctly
             Path secondsLabelPath = new Path();
             secondsLabelPath.addArc(secondsOval, -90, 180);
@@ -355,9 +359,9 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
 
             if (bTextEnabled) {
                 //If we have to draw a stroke, we need another paint...
-                //Also, only draw stroke it we aren't in ambient high contrast mode
-                if (bTextStroke && (mActive || !bGrayAmbient)){
-                    if (bInvertText){
+                //Draw stroke in ambient so it's visible
+                if ((bTextStroke && mActive) || (bGrayAmbient && !mActive)){
+                    if (bInvertText || (bGrayAmbient && !mActive)){
                         mFontStrokePaint.setColor(0xFFFFFFFF);
                     }
                     else{
