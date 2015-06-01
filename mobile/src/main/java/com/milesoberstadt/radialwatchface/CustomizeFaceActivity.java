@@ -278,6 +278,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 .addApi(Wearable.API)
                 .build();
 
+        //Once we're connected, send all our previously set settings...
+        sendAllSettings();
+
         pickFaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -342,7 +345,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     strokeSwitch.setEnabled(false);
                 }
 
-                syncBoolean("/text", "enableText", textSwitch.isChecked());
+                //syncBoolean("/text", "enableText", textSwitch.isChecked());
+                sendAllSettings();
             }
         });
 
@@ -354,7 +358,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                 watchView.b24HourTime = b24HourTime = militarySwitch.isChecked();
 
-                syncBoolean("/text", "24hourtime", militarySwitch.isChecked());
+                //syncBoolean("/text", "24hourtime", militarySwitch.isChecked());
+                sendAllSettings();
             }
         });
 
@@ -366,7 +371,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                 watchView.bInvertText = bInvertText = invertSwitch.isChecked();
 
-                syncBoolean("/text", "invertText", invertSwitch.isChecked());
+                //syncBoolean("/text", "invertText", invertSwitch.isChecked());
+                sendAllSettings();
             }
         });
 
@@ -378,7 +384,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                 watchView.bStrokeText = bTextStroke = strokeSwitch.isChecked();
 
-                syncBoolean("/text", "strokeText", strokeSwitch.isChecked());
+                //syncBoolean("/text", "strokeText", strokeSwitch.isChecked());
+                sendAllSettings();
             }
         });
 
@@ -390,7 +397,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                 watchView.bShowMilli = bSmoothAnimations = smoothSwitch.isChecked();
 
-                syncBoolean("/anim", "smoothAnim", smoothSwitch.isChecked());
+                //syncBoolean("/anim", "smoothAnim", smoothSwitch.isChecked());
+                sendAllSettings();
             }
         });
 
@@ -400,7 +408,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 editor.putBoolean("grayAmbient", graySwitch.isChecked());
                 editor.apply();
 
-                syncBoolean("/color", "grayAmbient", graySwitch.isChecked());
+                //syncBoolean("/color", "grayAmbient", graySwitch.isChecked());
+                sendAllSettings();
             }
         });
     }
@@ -458,6 +467,55 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     protected void onDestroy() {
         super.onDestroy();
         mGoogleApiClient.disconnect();
+    }
+
+    private void sendAllSettings(){
+
+        String col1 = String.format("#%06X", (0xFFFFFF & ringColor1));
+        String col2 = String.format("#%06X", (0xFFFFFF & ringColor2));
+        String col3 = String.format("#%06X", (0xFFFFFF & ringColor3));
+
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
+        dataMap.getDataMap().putString("color1", col1);
+        dataMap.getDataMap().putString("color2", col2);
+        dataMap.getDataMap().putString("color3", col3);
+        PutDataRequest request = dataMap.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
+                .putDataItem(mGoogleApiClient, request);
+
+        pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+            @Override
+            public void onResult(DataApi.DataItemResult dataItemResult) {
+                if (dataItemResult.getStatus().isSuccess()) {
+                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
+                }
+                else
+                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
+            }
+        });
+
+        PutDataMapRequest dataMap2 = PutDataMapRequest.create("/text");
+        dataMap2.getDataMap().putBoolean("enableText", bTextEnabled);
+        dataMap2.getDataMap().putBoolean("24hourtime", b24HourTime);
+        dataMap2.getDataMap().putBoolean("invertText", bInvertText);
+        dataMap2.getDataMap().putBoolean("strokeText", bTextStroke);
+        dataMap2.getDataMap().putBoolean("smoothAnim", bTextStroke);
+        dataMap2.getDataMap().putBoolean("grayAmbient", bTextStroke);
+        PutDataRequest request2 = dataMap2.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult2 = Wearable.DataApi
+                .putDataItem(mGoogleApiClient, request2);
+
+        pendingResult2.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+            @Override
+            public void onResult(DataApi.DataItemResult dataItemResult) {
+                if (dataItemResult.getStatus().isSuccess()) {
+                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
+                }
+                else
+                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
+            }
+        });
+
     }
 
     private void displayNoConnectedDeviceDialog() {

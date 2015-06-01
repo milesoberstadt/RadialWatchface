@@ -71,25 +71,25 @@
                 />
 
             <Switch
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/show_text"
                 android:id="@+id/text_switch" />
 
             <Switch
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/military_time"
                 android:id="@+id/military_switch" />
 
             <Switch
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/invert_text"
                 android:id="@+id/invert_switch" />
 
             <Switch
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/text_stroke"
                 android:id="@+id/stroke_switch" />
@@ -105,13 +105,13 @@
                 />
 
             <Switch
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/sm_sec"
                 android:id="@+id/smooth_switch" />
 
             <Switch
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/gray_ambient"
                 android:id="@+id/gray_switch" />
