@@ -499,8 +499,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         dataMap2.getDataMap().putBoolean("24hourtime", b24HourTime);
         dataMap2.getDataMap().putBoolean("invertText", bInvertText);
         dataMap2.getDataMap().putBoolean("strokeText", bTextStroke);
-        dataMap2.getDataMap().putBoolean("smoothAnim", bTextStroke);
-        dataMap2.getDataMap().putBoolean("grayAmbient", bTextStroke);
+        dataMap2.getDataMap().putBoolean("smoothAnim", bSmoothAnimations);
+        dataMap2.getDataMap().putBoolean("grayAmbient", bGrayAmbient);
+
         PutDataRequest request2 = dataMap2.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult2 = Wearable.DataApi
                 .putDataItem(mGoogleApiClient, request2);
