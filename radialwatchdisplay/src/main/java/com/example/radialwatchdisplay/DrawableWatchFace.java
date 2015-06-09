@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.preference.PreferenceManager;
-import android.text.format.Time;
 
 import java.util.Calendar;
 
@@ -77,7 +76,7 @@ public class DrawableWatchFace {
 
     public void loadSettings(Context context){
         settings = PreferenceManager.getDefaultSharedPreferences(context);
-        editor = settings.edit();
+        //editor = settings.edit();
         //Get specific prefs, with defaults
         int tmp1 = settings.getInt("ringColor1", -1);
         int tmp2 = settings.getInt("ringColor2", -1);

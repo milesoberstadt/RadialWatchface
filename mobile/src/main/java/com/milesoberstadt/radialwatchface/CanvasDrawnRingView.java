@@ -3,10 +3,7 @@ package com.milesoberstadt.radialwatchface;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -42,6 +39,7 @@ public class CanvasDrawnRingView extends View{
         faceDrawer.color1 = a.getColor(R.styleable.radialColors_hour_color, faceDrawer.color1);
         faceDrawer.color2 = a.getColor(R.styleable.radialColors_minute_color, faceDrawer.color2);
         faceDrawer.color3 = a.getColor(R.styleable.radialColors_second_color, faceDrawer.color3);
+        a.recycle();
 
         init();
     }
@@ -59,8 +57,8 @@ public class CanvasDrawnRingView extends View{
     protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec){
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int parentWidth = MeasureSpec.getSize(widthMeasureSpec); // receives parents width in pixel
-        int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+        //int parentWidth = MeasureSpec.getSize(widthMeasureSpec); // receives parents width in pixel
+        //int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
 
         //your desired sizes, converted from pixels to setMeasuredDimension's unit
         final int desiredWSpec = MeasureSpec.makeMeasureSpec(mySize.width(), MeasureSpec.EXACTLY);

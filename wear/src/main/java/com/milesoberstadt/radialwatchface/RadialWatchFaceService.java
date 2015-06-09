@@ -4,23 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
@@ -37,7 +27,6 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * Created by milesoberstadt on 12/16/14.
@@ -152,7 +141,6 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                 Log.v(TAG, "onDraw");
             }
 
-            long now = System.currentTimeMillis();
             mTime = Calendar.getInstance();
 
             faceDrawer.draw(canvas, mTime, bounds);

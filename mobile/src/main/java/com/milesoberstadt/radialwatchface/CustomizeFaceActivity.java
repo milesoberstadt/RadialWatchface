@@ -4,12 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -164,26 +162,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         watchView.faceDrawer.saveSettings(getApplicationContext());
     }
 
-    private void syncBoolean(String path, String boolName, boolean value){
-        PutDataMapRequest dataMap = PutDataMapRequest.create(path);
-        dataMap.getDataMap().putBoolean(boolName, value);
-        PutDataRequest request = dataMap.asPutDataRequest();
-        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
-                .putDataItem(mGoogleApiClient, request);
-
-        pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-            @Override
-            public void onResult(DataApi.DataItemResult dataItemResult) {
-                if (dataItemResult.getStatus().isSuccess()) {
-                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
-                }
-                else
-                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
-            }
-        });
-    }
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -237,7 +215,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 int watchCount = watchHolder.getChildCount();
 
                 for (int i=0;i<watchCount; i++){
-                    ((LinearLayout) watchHolder.getChildAt(i)).setOnClickListener(watchClicked);
+                    (watchHolder.getChildAt(i)).setOnClickListener(watchClicked);
                 }
 
             }
@@ -354,9 +332,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         }
     }
 
+    // TODO: Delete this method if we really don't use it...
     @Override // ResultCallback<DataApi.DataItemResult>
     public void onResult(DataApi.DataItemResult dataItemResult) {
-        if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
+        /*if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
             DataItem configDataItem = dataItemResult.getDataItem();
             DataMapItem dataMapItem = DataMapItem.fromDataItem(configDataItem);
             DataMap config = dataMapItem.getDataMap();
@@ -365,7 +344,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             // If DataItem with the current config can't be retrieved, select the default items on
             // each picker.
 
-        }
+        }*/
     }
 
     @Override // GoogleApiClient.ConnectionCallbacks
@@ -441,6 +420,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
     }
 
+    // TODO: Make this actually happen again
     private void displayNoConnectedDeviceDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         String messageText = getResources().getString(R.string.title_no_device_connected);
