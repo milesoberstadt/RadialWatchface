@@ -36,6 +36,7 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.Calendar;
 import java.util.TimeZone;
 
 /**
@@ -59,13 +60,14 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
 
         private DrawableWatchFace faceDrawer;
 
-        Time mTime;
+        private Calendar mTime;
 
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mTime.clear(intent.getStringExtra("time-zone"));
-                mTime.setToNow();
+                //mTime.clear(intent.getStringExtra("time-zone"));
+                //mTime.setToNow();
+                mTime = Calendar.getInstance();
             }
         };
         boolean mRegisteredTimeZoneReceiver = false;
@@ -94,7 +96,7 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                     .build());
 
 
-            mTime = new Time();
+            mTime = Calendar.getInstance();
 
             try {
                 mGoogleApiClient.connect();
@@ -150,6 +152,9 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                 Log.v(TAG, "onDraw");
             }
 
+            long now = System.currentTimeMillis();
+            mTime = Calendar.getInstance();
+
             faceDrawer.draw(canvas, mTime, bounds);
 
             // Draw every frame as long as we're visible and in interactive mode.
@@ -166,8 +171,9 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                 registerReceiver();
 
                 // Update time zone in case it changed while we weren't visible.
-                mTime.clear(TimeZone.getDefault().getID());
-                mTime.setToNow();
+                //mTime.clear(TimeZone.getDefault().getID());
+                //mTime.setToNow();
+                mTime = Calendar.getInstance();
 
                 invalidate();
             } else {

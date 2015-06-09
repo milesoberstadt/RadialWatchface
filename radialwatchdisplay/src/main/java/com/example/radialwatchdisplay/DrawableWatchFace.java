@@ -10,6 +10,8 @@ import android.graphics.RectF;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
 
+import java.util.Calendar;
+
 /**
  * Created by miles on 6/9/15.
  */
@@ -30,6 +32,9 @@ public class DrawableWatchFace {
     public int color1 = 0xFFe51c23;
     public int color2 = 0xFF8bc34a;
     public int color3 = 0xFF03a9f4;
+    public String colorComboName = "RGB";
+
+    private Boolean _bShowBackground = true;
 
 
     public Boolean bGrayAmbient = false; //Black and white mode for ambient displays
@@ -65,7 +70,7 @@ public class DrawableWatchFace {
         mFontPaint.setColor(0xFFFFFFFF);
         mFontPaint.setTextSize(24);
 
-        mBackgroundPaint.setColor(0xFF000000);
+        setBShowBackground(_bShowBackground);
 
         textRadians = textAngle * (float)(3.14159/180);
     }
@@ -85,6 +90,8 @@ public class DrawableWatchFace {
         if (tmp3 != -1)
             color3 = tmp3;
 
+        colorComboName = settings.getString("watchFaceCombo", "RGB");
+
         //Get text options
         bTextEnabled = settings.getBoolean("enableText", true);
         bInvertText = settings.getBoolean("invertText", false);
@@ -101,6 +108,7 @@ public class DrawableWatchFace {
         editor.putInt("ringColor1", color1);
         editor.putInt("ringColor2", color2);
         editor.putInt("ringColor3", color3);
+        editor.putString("watchFaceCombo", colorComboName);
 
         editor.putBoolean("enableText", bTextEnabled);
         editor.putBoolean("invertText", bInvertText);
@@ -122,14 +130,20 @@ public class DrawableWatchFace {
         }
     }
 
-    public void draw(Canvas canvas, Time mTime, Rect bounds){
-        long now = System.currentTimeMillis();
-        mTime.set(now);
-        int milliseconds = (int) (now % 1000);
+    public void setBShowBackground(Boolean state){
+        _bShowBackground = state;
+        if (_bShowBackground)
+            mBackgroundPaint.setColor(0xFF000000);
+        else
+            mBackgroundPaint.setColor(0x00000000);
+    }
 
-        int seconds = mTime.second;
-        int minutes = mTime.minute;
-        int hours = mTime.hour;
+    public void draw(Canvas canvas, Calendar mTime, Rect bounds){
+
+        int hours = mTime.get(Calendar.HOUR_OF_DAY);
+        int minutes = mTime.get(Calendar.MINUTE);
+        int seconds = mTime.get(Calendar.SECOND);
+        int milliseconds = mTime.get(Calendar.MILLISECOND);
 
         myWidth = bounds.width();
         if (myWidth > 300)
