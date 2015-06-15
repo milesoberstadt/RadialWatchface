@@ -80,26 +80,65 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/military_time"
-                android:id="@+id/military_switch" />
+                android:text="@string/text_stroke"
+                android:id="@+id/stroke_switch" />
 
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/text_stroke"
-                android:id="@+id/stroke_switch" />
+                android:text="@string/military_time"
+                android:id="@+id/military_switch" />
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/text_color"
-                android:id="@+id/set_text_color"/>
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:gravity="center">
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/text_stroke_color"
-                android:id="@+id/set_text_stroke_color"/>
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_weight="1">
+                    <View
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="#00FFFFFF"
+                        android:id="@+id/text_color_preview" />
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_color"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/swap_colors"
+                    android:id="@+id/swap_color_button"/>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_weight="1">
+                    <View
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="#00FFFFFF"
+                        android:id="@+id/stroke_color_preview" />
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_stroke_color"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="fill_parent"

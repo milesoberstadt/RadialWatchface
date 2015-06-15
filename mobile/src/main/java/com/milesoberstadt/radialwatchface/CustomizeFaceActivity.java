@@ -36,7 +36,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private CanvasDrawnRingView watchView;
     private TextView watchLabel;
 
-    private Button pickFaceButton, pickCustomButton, pickTextColorButton, pickTextStrokeButton;
+    private Button pickFaceButton, pickCustomButton, swapTextStrokeButton;
+    private View pickTextColorButton, pickTextStrokeButton;
 
 
     private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
@@ -124,8 +125,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
         pickCustomButton = (Button) findViewById(R.id.changeCustomFace);
-        pickTextColorButton = (Button) findViewById(R.id.set_text_color);
-        pickTextStrokeButton = (Button) findViewById(R.id.set_text_stroke_color);
+        swapTextStrokeButton = (Button) findViewById(R.id.swap_color_button);
+        pickTextColorButton = findViewById(R.id.text_color_preview);
+        pickTextStrokeButton = findViewById(R.id.stroke_color_preview);
 
         //Define switches
         textSwitch = (Switch) findViewById(R.id.text_switch);
@@ -174,17 +176,35 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         });
 
-        pickTextColorButton.setOnClickListener(new View.OnClickListener(){
+        pickTextColorButton.setBackgroundColor(watchView.faceDrawer.textColor);
+        pickTextColorButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 showTextColorPicker();
             }
         });
 
+        pickTextStrokeButton.setBackgroundColor(watchView.faceDrawer.textStrokeColor);
         pickTextStrokeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showTextStrokePicker();
+            }
+        });
+
+        swapTextStrokeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int oldText = watchView.faceDrawer.textColor;
+                int oldStroke = watchView.faceDrawer.textStrokeColor;
+
+                watchView.faceDrawer.textStrokeColor = oldText;
+                watchView.faceDrawer.textColor = oldStroke;
+
+                pickTextColorButton.setBackgroundColor(watchView.faceDrawer.textColor);
+                pickTextStrokeButton.setBackgroundColor(watchView.faceDrawer.textStrokeColor);
+
+                sendAllSettings();
             }
         });
 
@@ -442,6 +462,13 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 watchView.faceDrawer.color1 = Color.parseColor(colors[0]);
                 watchView.faceDrawer.color2 = Color.parseColor(colors[1]);
                 watchView.faceDrawer.color3 = Color.parseColor(colors[2]);
+
+                // TODO: Find somewhere in settings to have settings for defaults for these in templates
+                watchView.faceDrawer.textColor = 0xFFFFFFFF;
+                watchView.faceDrawer.textStrokeColor = 0xFF000000;
+                pickTextColorButton.setBackgroundColor(watchView.faceDrawer.textColor);
+                pickTextStrokeButton.setBackgroundColor(watchView.faceDrawer.textStrokeColor);
+
                 watchView.faceDrawer.colorComboName = displayName;
 
                 sendAllSettings();
@@ -462,6 +489,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "Text color selected: "+String.valueOf(color));
                 watchView.faceDrawer.textColor = color;
+                pickTextColorButton.setBackgroundColor(color);
                 watchView.faceDrawer.saveSettings(getApplicationContext());
                 sendAllSettings();
             }
@@ -480,6 +508,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "Text stroke selected: "+String.valueOf(color));
                 watchView.faceDrawer.textStrokeColor = color;
+                pickTextStrokeButton.setBackgroundColor(color);
                 watchView.faceDrawer.saveSettings(getApplicationContext());
                 sendAllSettings();
             }

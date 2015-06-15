@@ -13,8 +13,11 @@
     <string name="ok_no_device_connected">OK</string>
 
     <string name="text_options">Text Options</string>
-    <string name="text_color">Set Text Color...</string>
-    <string name="text_stroke_color">Set Text Stroke Color...</string>
+    <string name="set_text_color">Set Text Color...</string>
+    <string name="set_text_stroke_color">Set Text Stroke Color...</string>
+    <string name="text_color">Text Color</string>
+    <string name="text_stroke_color">Text Stroke Color</string>
+    <string name="swap_colors">Swap</string>
     <string name="show_text">Show Text</string>
     <string name="military_time">24 Hour Time</string>
     <string name="invert_text">Invert Text Colors</string>
