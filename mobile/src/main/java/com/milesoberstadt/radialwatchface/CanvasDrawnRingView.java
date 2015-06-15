@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -21,6 +22,18 @@ public class CanvasDrawnRingView extends View{
     private Calendar time;
 
     public DrawableWatchFace faceDrawer;
+
+    //Time stuff...
+    private Handler graphicsUpdateHandler = new Handler();
+    private Runnable graphicsUpdateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateSystemTime();
+            invalidate();
+
+            graphicsUpdateHandler.postDelayed(this, (1000 / 60)); //Desired framerate is 60fps
+        }
+    };
 
     public CanvasDrawnRingView(Context context){
         super(context);
@@ -42,6 +55,8 @@ public class CanvasDrawnRingView extends View{
         a.recycle();
 
         init();
+
+        graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
     }
 
     private void init(){
