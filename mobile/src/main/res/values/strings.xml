@@ -13,10 +13,12 @@
     <string name="ok_no_device_connected">OK</string>
 
     <string name="text_options">Text Options</string>
+    <string name="text_color">Set Text Color...</string>
+    <string name="text_stroke_color">Set Text Stroke Color...</string>
     <string name="show_text">Show Text</string>
     <string name="military_time">24 Hour Time</string>
     <string name="invert_text">Invert Text Colors</string>
-    <string name="text_stroke">Add Stroke To Text</string>
+    <string name="text_stroke">Show Text Stroke</string>
 
     <string name="display_options">Display Options</string>
     <string name="sm_sec">Smooth Seconds Animation</string>

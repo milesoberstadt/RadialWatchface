@@ -70,6 +70,7 @@
                 style="?android:listSeparatorTextViewStyle"
                 />
 
+
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -85,14 +86,20 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/invert_text"
-                android:id="@+id/invert_switch" />
-
-            <Switch
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:text="@string/text_stroke"
                 android:id="@+id/stroke_switch" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_color"
+                android:id="@+id/set_text_color"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_stroke_color"
+                android:id="@+id/set_text_stroke_color"/>
 
             <TextView
                 android:layout_width="fill_parent"

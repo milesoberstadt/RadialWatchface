@@ -36,10 +36,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private CanvasDrawnRingView watchView;
     private TextView watchLabel;
 
-    private Button pickFaceButton;
-    private Button pickCustomButton;
+    private Button pickFaceButton, pickCustomButton, pickTextColorButton, pickTextStrokeButton;
 
-    private Switch textSwitch, militarySwitch, invertSwitch, strokeSwitch, smoothSwitch, graySwitch;
+
+    private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
 
 
     private final Context context = this;
@@ -72,65 +72,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private String mPeerId;
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
 
-    private View.OnClickListener watchClicked = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            LinearLayout linearView = null;
-            CanvasDrawnRingView clickedView = null;
 
-            if (view instanceof LinearLayout)
-            {
-                linearView = (LinearLayout) view;
-                if (linearView.getChildAt(0) instanceof CanvasDrawnRingView) {
-                    clickedView = (CanvasDrawnRingView) linearView.getChildAt(0);
-                }
-            }
-
-            if (clickedView == null)
-                return;
-
-            int viewID = clickedView.getId();
-            //watchFaceCombo = linearView.getResources().getResourceEntryName(viewID);
-            //Log.d("LOLTEST", watchFaceCombo);
-
-            Resources res = getResources();
-            String[] colors = new String[0];
-            String displayName = "";
-            switch (viewID){
-                case R.id.watch_rgb:
-                    colors = res.getStringArray(R.array.watch_rgb_array);
-                    displayName = res.getString(R.string.watch_rgb);
-                    break;
-                case R.id.watch_cmy:
-                    colors = res.getStringArray(R.array.watch_cmy_array);
-                    displayName = res.getString(R.string.watch_cmy);
-                    break;
-                case R.id.watch_gray:
-                    colors = res.getStringArray(R.array.watch_gray_array);
-                    displayName = res.getString(R.string.watch_gray);
-                    break;
-                case R.id.watch_crayon:
-                    colors = res.getStringArray(R.array.watch_crayon_array);
-                    displayName = res.getString(R.string.watch_crayon);
-                    break;
-                case R.id.watch_pastels:
-                    colors = res.getStringArray(R.array.watch_pastels_array);
-                    displayName = res.getString(R.string.watch_pastels);
-                    break;
-            }
-
-            if (colors.length == 3){
-
-                commitColors(colors[0],colors[1],colors[2], displayName);
-
-                watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
-            }
-
-            alertDialog.dismiss();
-        }
-    };
-
-    private void commitColors(String col1, String col2, String col3, String displayName){
+    // Depreciated: Use sendAllSettings()
+    /*private void commitColors(String col1, String col2, String col3, String displayName){
 
         watchView.faceDrawer.color1 = Color.parseColor(col1);
         watchView.faceDrawer.color2 = Color.parseColor(col2);
@@ -160,7 +104,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
 
         watchView.faceDrawer.saveSettings(getApplicationContext());
-    }
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,11 +124,12 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
         pickCustomButton = (Button) findViewById(R.id.changeCustomFace);
+        pickTextColorButton = (Button) findViewById(R.id.set_text_color);
+        pickTextStrokeButton = (Button) findViewById(R.id.set_text_stroke_color);
 
         //Define switches
         textSwitch = (Switch) findViewById(R.id.text_switch);
         militarySwitch = (Switch) findViewById(R.id.military_switch);
-        invertSwitch = (Switch) findViewById(R.id.invert_switch);
         strokeSwitch = (Switch) findViewById(R.id.stroke_switch);
         smoothSwitch = (Switch) findViewById(R.id.smooth_switch);
         graySwitch = (Switch) findViewById(R.id.gray_switch);
@@ -214,7 +159,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 LinearLayout watchHolder = (LinearLayout) alertDialog.findViewById(R.id.watchFaceHolder);
                 int watchCount = watchHolder.getChildCount();
 
-                for (int i=0;i<watchCount; i++){
+                for (int i = 0; i < watchCount; i++) {
                     (watchHolder.getChildAt(i)).setOnClickListener(watchClicked);
                 }
 
@@ -229,19 +174,33 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         });
 
+        pickTextColorButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                showTextColorPicker();
+            }
+        });
+
+        pickTextStrokeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showTextStrokePicker();
+            }
+        });
+
         textSwitch.setChecked(watchView.faceDrawer.bTextEnabled);
         militarySwitch.setChecked(watchView.faceDrawer.b24HourTime);
-        invertSwitch.setChecked(watchView.faceDrawer.bInvertText);
         strokeSwitch.setChecked(watchView.faceDrawer.bTextStroke);
         smoothSwitch.setChecked(watchView.faceDrawer.bShowMilli);
         graySwitch.setChecked(watchView.faceDrawer.bGrayAmbient);
 
         if (textSwitch.isChecked()){
-            invertSwitch.setEnabled(true);
+            textSwitch.setEnabled(true);
+            militarySwitch.setEnabled(true);
             strokeSwitch.setEnabled(true);
         }
         else{
-            invertSwitch.setEnabled(false);
+            militarySwitch.setEnabled(false);
             strokeSwitch.setEnabled(false);
         }
 
@@ -253,13 +212,16 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                 if (textSwitch.isChecked())
                 {
-                    invertSwitch.setEnabled(true);
+                    textSwitch.setEnabled(true);
+                    militarySwitch.setEnabled(true);
                     strokeSwitch.setEnabled(true);
                 }
 
                 else{
-                    invertSwitch.setEnabled(false);
+                    militarySwitch.setEnabled(false);
+                    militarySwitch.setChecked(false);
                     strokeSwitch.setEnabled(false);
+                    strokeSwitch.setChecked(false);
                 }
 
                 sendAllSettings();
@@ -270,15 +232,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             @Override
             public void onClick(View v) {
                 watchView.faceDrawer.b24HourTime = militarySwitch.isChecked();
-
-                sendAllSettings();
-            }
-        });
-
-        invertSwitch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                watchView.faceDrawer.bInvertText = invertSwitch.isChecked();
 
                 sendAllSettings();
             }
@@ -375,11 +328,15 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         String col1 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color1));
         String col2 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color2));
         String col3 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color3));
+        String textCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textColor));
+        String textSCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textStrokeColor));
 
         PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
         dataMap.getDataMap().putString("color1", col1);
         dataMap.getDataMap().putString("color2", col2);
         dataMap.getDataMap().putString("color3", col3);
+        dataMap.getDataMap().putString("textColor", textCol);
+        dataMap.getDataMap().putString("textStrokeColor", textSCol);
         PutDataRequest request = dataMap.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
                 .putDataItem(mGoogleApiClient, request);
@@ -389,16 +346,14 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onResult(DataApi.DataItemResult dataItemResult) {
                 if (dataItemResult.getStatus().isSuccess()) {
                     Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
-                }
-                else
-                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
+                } else
+                    Log.d(TAG, "Wow, so fail: " + dataItemResult.getStatus().toString());
             }
         });
 
         PutDataMapRequest dataMap2 = PutDataMapRequest.create("/text");
         dataMap2.getDataMap().putBoolean("enableText", watchView.faceDrawer.bTextEnabled);
         dataMap2.getDataMap().putBoolean("24hourtime", watchView.faceDrawer.b24HourTime);
-        dataMap2.getDataMap().putBoolean("invertText", watchView.faceDrawer.bInvertText);
         dataMap2.getDataMap().putBoolean("strokeText", watchView.faceDrawer.bTextStroke);
         dataMap2.getDataMap().putBoolean("smoothAnim", watchView.faceDrawer.bShowMilli);
         dataMap2.getDataMap().putBoolean("grayAmbient", watchView.faceDrawer.bGrayAmbient);
@@ -434,6 +389,106 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         alert.show();
     }
 
+    private View.OnClickListener watchClicked = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            LinearLayout linearView = null;
+            CanvasDrawnRingView clickedView = null;
+
+            if (view instanceof LinearLayout)
+            {
+                linearView = (LinearLayout) view;
+                if (linearView.getChildAt(0) instanceof CanvasDrawnRingView) {
+                    clickedView = (CanvasDrawnRingView) linearView.getChildAt(0);
+                }
+            }
+
+            if (clickedView == null)
+                return;
+
+            int viewID = clickedView.getId();
+            //watchFaceCombo = linearView.getResources().getResourceEntryName(viewID);
+            //Log.d("LOLTEST", watchFaceCombo);
+
+            Resources res = getResources();
+            String[] colors = new String[0];
+            String displayName = "";
+            switch (viewID){
+                case R.id.watch_rgb:
+                    colors = res.getStringArray(R.array.watch_rgb_array);
+                    displayName = res.getString(R.string.watch_rgb);
+                    break;
+                case R.id.watch_cmy:
+                    colors = res.getStringArray(R.array.watch_cmy_array);
+                    displayName = res.getString(R.string.watch_cmy);
+                    break;
+                case R.id.watch_gray:
+                    colors = res.getStringArray(R.array.watch_gray_array);
+                    displayName = res.getString(R.string.watch_gray);
+                    break;
+                case R.id.watch_crayon:
+                    colors = res.getStringArray(R.array.watch_crayon_array);
+                    displayName = res.getString(R.string.watch_crayon);
+                    break;
+                case R.id.watch_pastels:
+                    colors = res.getStringArray(R.array.watch_pastels_array);
+                    displayName = res.getString(R.string.watch_pastels);
+                    break;
+            }
+
+            if (colors.length == 3){
+
+                //commitColors(colors[0],colors[1],colors[2], displayName);
+                watchView.faceDrawer.color1 = Color.parseColor(colors[0]);
+                watchView.faceDrawer.color2 = Color.parseColor(colors[1]);
+                watchView.faceDrawer.color3 = Color.parseColor(colors[2]);
+                watchView.faceDrawer.colorComboName = displayName;
+
+                sendAllSettings();
+
+                watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
+            }
+
+            alertDialog.dismiss();
+        }
+    };
+
+    private void showTextColorPicker(){
+        int initialColor = watchView.faceDrawer.textColor;
+        String title = getString(R.string.text_color);
+
+        final ColorPickerDialog colorPickerDialog = new ColorPickerDialog(this, initialColor, new ColorPickerDialog.OnColorSelectedListener() {
+            @Override
+            public void onColorSelected(int color) {
+                Log.d(TAG, "Text color selected: "+String.valueOf(color));
+                watchView.faceDrawer.textColor = color;
+                watchView.faceDrawer.saveSettings(getApplicationContext());
+                sendAllSettings();
+            }
+        });
+
+        colorPickerDialog.setTitle(title);
+        colorPickerDialog.show();
+    }
+
+    private void showTextStrokePicker(){
+        int initialColor = watchView.faceDrawer.textStrokeColor;
+        String title = getString(R.string.text_stroke_color);
+
+        final ColorPickerDialog colorPickerDialog = new ColorPickerDialog(this, initialColor, new ColorPickerDialog.OnColorSelectedListener() {
+            @Override
+            public void onColorSelected(int color) {
+                Log.d(TAG, "Text stroke selected: "+String.valueOf(color));
+                watchView.faceDrawer.textStrokeColor = color;
+                watchView.faceDrawer.saveSettings(getApplicationContext());
+                sendAllSettings();
+            }
+        });
+
+        colorPickerDialog.setTitle(title);
+        colorPickerDialog.show();
+    }
+
     private void showColorPicker(){
 
         int initialColor = 0xFF000000;
@@ -466,13 +521,18 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 else if (customChooserPosition == 2){
                     customColors[customChooserPosition] = color;
 
-                    String col1 = String.format("#%06X", (0xFFFFFF & customColors[0]));
+                    /*String col1 = String.format("#%06X", (0xFFFFFF & customColors[0]));
                     String col2 = String.format("#%06X", (0xFFFFFF & customColors[1]));
-                    String col3 = String.format("#%06X", (0xFFFFFF & customColors[2]));
+                    String col3 = String.format("#%06X", (0xFFFFFF & customColors[2]));*/
 
-                    commitColors(col1, col2, col3, "Custom");
+                    watchView.faceDrawer.color1 = customColors[0];
+                    watchView.faceDrawer.color2 = customColors[1];
+                    watchView.faceDrawer.color3 = customColors[2];
 
                     watchView.faceDrawer.colorComboName= "Custom";
+                    //commitColors(col1, col2, col3, "Custom");
+                    sendAllSettings();
+
                     watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
 
                     customChooserPosition = 0;

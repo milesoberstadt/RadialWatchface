@@ -225,11 +225,19 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                     if (dm.containsKey("color3"))
                         faceDrawer.color3 = Color.parseColor(dm.getString("color3"));
 
+                    // Parse text colors...
+                    if (dm.containsKey("textColor"))
+                        faceDrawer.textColor = Color.parseColor(dm.getString("textColor"));
+                    if (dm.containsKey("textStrokeColor"))
+                        faceDrawer.textStrokeColor = Color.parseColor(dm.getString("textStrokeColor"));
+
                     if (dm.containsKey("enableText")){
                         faceDrawer.bTextEnabled = dm.getBoolean("enableText");
                     }
+                    // TODO: Remove this, it's in for legacy theme support...
                     if (dm.containsKey("invertText")){
-                        faceDrawer.bInvertText = dm.getBoolean("invertText");
+                        faceDrawer.textColor = 0xFF000000;
+                        faceDrawer.textStrokeColor = 0xFFFFFFFF;
                     }
                     if (dm.containsKey("strokeText")){
                         faceDrawer.bTextStroke = dm.getBoolean("strokeText");

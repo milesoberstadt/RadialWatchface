@@ -23,7 +23,6 @@ public class DrawableWatchFace {
     Boolean bPadTimeVals = true;
 
     //Draw options - these settings need to be public...
-    public Boolean bInvertText = false;
     public Boolean bTextEnabled = true;
     public Boolean bTextStroke = false;
     public Boolean bShowMilli = false; //This decides if we display smooth animations for milliseconds
@@ -31,6 +30,10 @@ public class DrawableWatchFace {
     public int color1 = 0xFFe51c23;
     public int color2 = 0xFF8bc34a;
     public int color3 = 0xFF03a9f4;
+
+    public int textColor = 0xFFFFFFFF;
+    public int textStrokeColor = 0xFF000000;
+
     public String colorComboName = "RGB";
 
     private Boolean _bShowBackground = true;
@@ -66,7 +69,7 @@ public class DrawableWatchFace {
         mFontStrokePaint.setTextSize(24);
         mFontStrokePaint.setStrokeWidth(2);
 
-        mFontPaint.setColor(0xFFFFFFFF);
+        mFontPaint.setColor(textColor);
         mFontPaint.setTextSize(24);
 
         setBShowBackground(_bShowBackground);
@@ -89,11 +92,13 @@ public class DrawableWatchFace {
         if (tmp3 != -1)
             color3 = tmp3;
 
+        textColor = settings.getInt("textColor", textColor);
+        textStrokeColor = settings.getInt("textStrokeColor", textStrokeColor);
+
         colorComboName = settings.getString("watchFaceCombo", "RGB");
 
         //Get text options
         bTextEnabled = settings.getBoolean("enableText", true);
-        bInvertText = settings.getBoolean("invertText", false);
         bTextStroke = settings.getBoolean("strokeText", false);
         bShowMilli = settings.getBoolean("smoothAnim", false);
         bGrayAmbient = settings.getBoolean("grayAmbient", false);
@@ -107,10 +112,11 @@ public class DrawableWatchFace {
         editor.putInt("ringColor1", color1);
         editor.putInt("ringColor2", color2);
         editor.putInt("ringColor3", color3);
+        editor.putInt("textColor", textColor);
+        editor.putInt("textStrokeColor", textStrokeColor);
         editor.putString("watchFaceCombo", colorComboName);
 
         editor.putBoolean("enableText", bTextEnabled);
-        editor.putBoolean("invertText", bInvertText);
         editor.putBoolean("strokeText", bTextStroke);
         editor.putBoolean("smoothAnim", bTextStroke);
         editor.putBoolean("grayAmbient", bGrayAmbient);
@@ -248,22 +254,17 @@ public class DrawableWatchFace {
         float minutesXOffset = (float) ((minutesOval.width()/2)*Math.cos(textRadians));
         float hoursXOffset = (float) ((hoursOval.width()/2)*Math.cos(textRadians));
 
-        if (bInvertText){
-            mFontPaint.setColor(0xFF000000);
-        }
-        else{
-            mFontPaint.setColor(0xFFFFFFFF);
-        }
+        mFontPaint.setColor(textColor);
 
         if (bTextEnabled) {
             //If we have to draw a stroke, we need another paint...
             //Draw stroke in ambient so it's visible
             if ((bTextStroke && mActive) || (bGrayAmbient && !mActive)){
-                if (bInvertText || (bGrayAmbient && !mActive)){
+                if ((bGrayAmbient && !mActive)){
                     mFontStrokePaint.setColor(0xFFFFFFFF);
                 }
                 else{
-                    mFontStrokePaint.setColor(0xFF000000);
+                    mFontStrokePaint.setColor(textStrokeColor);
                 }
 
                 //Text draws differ based on device size...
