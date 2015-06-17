@@ -100,6 +100,9 @@ MERGED from com.google.android.gms:play-services-base:7.3.0:20:5
 MERGED from com.android.support:support-v4:22.2.0:22:5
 MERGED from com.android.support:support-v13:21.0.0:16:5
 MERGED from com.android.support:support-v4:22.2.0:22:5
+MERGED from RadialWatchFace:radialwatchdisplay:unspecified:11:5
+MERGED from com.android.support:appcompat-v7:22.2.0:22:5
+MERGED from com.android.support:support-v4:22.2.0:22:5
 MERGED from AndroidManifest.xml:4:5
 	android:label
 		ADDED from AndroidManifest.xml:6:9
@@ -264,6 +267,9 @@ MERGED from com.google.android.gms:play-services-wearable:7.3.0:18:5
 MERGED from com.google.android.gms:play-services-base:7.3.0:18:5
 MERGED from com.android.support:support-v4:22.2.0:20:5
 MERGED from com.android.support:support-v13:21.0.0:15:5
+MERGED from com.android.support:support-v4:22.2.0:20:5
+MERGED from RadialWatchFace:radialwatchdisplay:unspecified:7:5
+MERGED from com.android.support:appcompat-v7:22.2.0:20:5
 MERGED from com.android.support:support-v4:22.2.0:20:5
 MERGED from AndroidManifest.xml:3:13
 	android:targetSdkVersion

@@ -30,6 +30,7 @@ public class DrawableWatchFace {
     public int color1 = 0xFFe51c23;
     public int color2 = 0xFF8bc34a;
     public int color3 = 0xFF03a9f4;
+    public int backgroundColor = 0xFF000000;
 
     public int textColor = 0xFFFFFFFF;
     public int textStrokeColor = 0xFF000000;
@@ -92,6 +93,7 @@ public class DrawableWatchFace {
         if (tmp3 != -1)
             color3 = tmp3;
 
+        backgroundColor = settings.getInt("bg", backgroundColor);
         textColor = settings.getInt("textColor", textColor);
         textStrokeColor = settings.getInt("textStrokeColor", textStrokeColor);
 
@@ -112,6 +114,7 @@ public class DrawableWatchFace {
         editor.putInt("ringColor1", color1);
         editor.putInt("ringColor2", color2);
         editor.putInt("ringColor3", color3);
+        editor.putInt("bg", backgroundColor);
         editor.putInt("textColor", textColor);
         editor.putInt("textStrokeColor", textStrokeColor);
         editor.putString("watchFaceCombo", colorComboName);
@@ -137,10 +140,6 @@ public class DrawableWatchFace {
 
     public void setBShowBackground(Boolean state){
         _bShowBackground = state;
-        if (_bShowBackground)
-            mBackgroundPaint.setColor(0xFF000000);
-        else
-            mBackgroundPaint.setColor(0x00000000);
     }
 
     public void draw(Canvas canvas, Calendar mTime, Rect bounds){
@@ -155,6 +154,12 @@ public class DrawableWatchFace {
             strokeWidth = 30.f;
         else
             strokeWidth = 25.f;
+
+
+        if (_bShowBackground)
+            mBackgroundPaint.setColor(backgroundColor);
+        else
+            mBackgroundPaint.setColor(0x00000000);
 
         // Draw our background / wipe the screen
         canvas.drawRect(bounds, mBackgroundPaint);

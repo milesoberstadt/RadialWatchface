@@ -224,7 +224,8 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                         faceDrawer.color2 = Color.parseColor(dm.getString("color2"));
                     if (dm.containsKey("color3"))
                         faceDrawer.color3 = Color.parseColor(dm.getString("color3"));
-
+                    if (dm.containsKey("bg"))
+                        faceDrawer.backgroundColor = Color.parseColor(dm.getString("bg"));
                     // Parse text colors...
                     if (dm.containsKey("textColor"))
                         faceDrawer.textColor = Color.parseColor(dm.getString("textColor"));

@@ -2,6 +2,8 @@ package com.milesoberstadt.radialwatchface;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -46,7 +48,7 @@ public class CanvasDrawnRingView extends View{
 
         faceDrawer = new DrawableWatchFace();
         //Don't show background with this...
-        faceDrawer.setBShowBackground(false);
+        //faceDrawer.setBShowBackground(false);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.radialColors);
         faceDrawer.color1 = a.getColor(R.styleable.radialColors_hour_color, faceDrawer.color1);
@@ -60,11 +62,10 @@ public class CanvasDrawnRingView extends View{
     }
 
     private void init(){
-
         updateSystemTime();
     }
 
-    protected void onDraw(Canvas canvas){
+    protected void onDraw(Canvas canvas) {
 
         faceDrawer.draw(canvas, time, mySize);
     }

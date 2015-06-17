@@ -65,35 +65,36 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/text_options"
-                android:id="@+id/option_text_View"
+                android:text="@string/color_options"
+                android:id="@+id/option_colors"
                 style="?android:listSeparatorTextViewStyle"
                 />
 
-
-            <Switch
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/show_text"
-                android:id="@+id/text_switch" />
-
-            <Switch
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/text_stroke"
-                android:id="@+id/stroke_switch" />
-
-            <Switch
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/military_time"
-                android:id="@+id/military_switch" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp">
+                <View
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="#00FFFFFF"
+                    android:id="@+id/bg_color_preview" />
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/set_bg"/>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
-                android:gravity="center">
+                android:gravity="center_vertical">
 
                 <LinearLayout
                     android:layout_width="fill_parent"
@@ -139,6 +140,35 @@
                 </LinearLayout>
 
             </LinearLayout>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/text_options"
+                android:id="@+id/option_text_View"
+                style="?android:listSeparatorTextViewStyle"
+                />
+
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/show_text"
+                android:id="@+id/text_switch" />
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/text_stroke"
+                android:id="@+id/stroke_switch" />
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/military_time"
+                android:id="@+id/military_switch" />
 
             <TextView
                 android:layout_width="fill_parent"

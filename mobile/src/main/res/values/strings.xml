@@ -8,10 +8,12 @@
     <string name="watch_color_header">Watch Color Scheme</string>
     <string name="set_face">Change Face...</string>
     <string name="set_custom">Set Custom Scheme...</string>
+    <string name="set_bg">Background Color</string>
 
     <string name="title_no_device_connected">No wearable device is currently connected.</string>
     <string name="ok_no_device_connected">OK</string>
 
+    <string name="color_options">Set Colors</string>
     <string name="text_options">Text Options</string>
     <string name="set_text_color">Set Text Color...</string>
     <string name="set_text_stroke_color">Set Text Stroke Color...</string>

@@ -37,7 +37,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private TextView watchLabel;
 
     private Button pickFaceButton, pickCustomButton, swapTextStrokeButton;
-    private View pickTextColorButton, pickTextStrokeButton;
+    private View pickTextColorButton, pickTextStrokeButton, pickBackgroundButton;
 
 
     private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
@@ -128,6 +128,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         swapTextStrokeButton = (Button) findViewById(R.id.swap_color_button);
         pickTextColorButton = findViewById(R.id.text_color_preview);
         pickTextStrokeButton = findViewById(R.id.stroke_color_preview);
+        pickBackgroundButton = findViewById(R.id.bg_color_preview);
 
         //Define switches
         textSwitch = (Switch) findViewById(R.id.text_switch);
@@ -205,6 +206,14 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 pickTextStrokeButton.setBackgroundColor(watchView.faceDrawer.textStrokeColor);
 
                 sendAllSettings();
+            }
+        });
+
+        pickBackgroundButton.setBackgroundColor(watchView.faceDrawer.backgroundColor);
+        pickBackgroundButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showBGColorPicker();
             }
         });
 
@@ -348,6 +357,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         String col1 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color1));
         String col2 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color2));
         String col3 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color3));
+        String bg = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.backgroundColor));
         String textCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textColor));
         String textSCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textStrokeColor));
 
@@ -355,6 +365,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         dataMap.getDataMap().putString("color1", col1);
         dataMap.getDataMap().putString("color2", col2);
         dataMap.getDataMap().putString("color3", col3);
+        dataMap.getDataMap().putString("bg", bg);
         dataMap.getDataMap().putString("textColor", textCol);
         dataMap.getDataMap().putString("textStrokeColor", textSCol);
         PutDataRequest request = dataMap.asPutDataRequest();
@@ -479,6 +490,25 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             alertDialog.dismiss();
         }
     };
+
+    private void showBGColorPicker(){
+        int initialColor = watchView.faceDrawer.backgroundColor;
+        String title = getString(R.string.text_color);
+
+        final ColorPickerDialog colorPickerDialog = new ColorPickerDialog(this, initialColor, new ColorPickerDialog.OnColorSelectedListener() {
+            @Override
+            public void onColorSelected(int color) {
+                Log.d(TAG, "BG color selected: "+String.valueOf(color));
+                watchView.faceDrawer.backgroundColor = color;
+                pickBackgroundButton.setBackgroundColor(color);
+                watchView.faceDrawer.saveSettings(getApplicationContext());
+                sendAllSettings();
+            }
+        });
+
+        colorPickerDialog.setTitle(title);
+        colorPickerDialog.show();
+    }
 
     private void showTextColorPicker(){
         int initialColor = watchView.faceDrawer.textColor;
