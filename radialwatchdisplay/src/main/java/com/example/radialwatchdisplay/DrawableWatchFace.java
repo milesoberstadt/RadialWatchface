@@ -35,6 +35,9 @@ public class DrawableWatchFace {
     public int textColor = 0xFFFFFFFF;
     public int textStrokeColor = 0xFF000000;
 
+    public int ringSizePercent = 50;
+    public int textSizePercent = 50;
+
     public String colorComboName = "RGB";
 
     private Boolean _bShowBackground = true;
@@ -46,10 +49,13 @@ public class DrawableWatchFace {
     Paint mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     Paint mFontPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     Paint mFontStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    float strokeWidth = 30.f;
+
+    float maximumRingSize;
+    float maximumTextSize;
+
     int myWidth = -1;
     float textAngle = 45;
-    float textRadians = 0;
+    float textRadians;
 
     protected SharedPreferences settings;
     protected SharedPreferences.Editor editor;
@@ -63,7 +69,6 @@ public class DrawableWatchFace {
     public DrawableWatchFace(){
         //Setup draw styles
         mArcPaint.setStyle(Paint.Style.STROKE);
-        mArcPaint.setStrokeWidth(strokeWidth);
         mArcPaint.setStrokeCap(Paint.Cap.BUTT);
 
         mFontStrokePaint.setStyle(Paint.Style.STROKE);
@@ -74,8 +79,6 @@ public class DrawableWatchFace {
         mFontPaint.setTextSize(24);
 
         setBShowBackground(_bShowBackground);
-
-        textRadians = textAngle * (float)(3.14159/180);
     }
 
     public void loadSettings(Context context){
@@ -96,6 +99,8 @@ public class DrawableWatchFace {
         backgroundColor = settings.getInt("bg", backgroundColor);
         textColor = settings.getInt("textColor", textColor);
         textStrokeColor = settings.getInt("textStrokeColor", textStrokeColor);
+        ringSizePercent = settings.getInt("ringSizePercent", ringSizePercent);
+        textSizePercent = settings.getInt("textSizePercent", textSizePercent);
 
         colorComboName = settings.getString("watchFaceCombo", "RGB");
 
@@ -117,6 +122,9 @@ public class DrawableWatchFace {
         editor.putInt("bg", backgroundColor);
         editor.putInt("textColor", textColor);
         editor.putInt("textStrokeColor", textStrokeColor);
+        editor.putInt("ringSizePercent", ringSizePercent);
+        editor.putInt("textSizePercent", textSizePercent);
+
         editor.putString("watchFaceCombo", colorComboName);
 
         editor.putBoolean("enableText", bTextEnabled);
@@ -150,11 +158,12 @@ public class DrawableWatchFace {
         int milliseconds = mTime.get(Calendar.MILLISECOND);
 
         myWidth = bounds.width();
-        if (myWidth > 300)
-            strokeWidth = 30.f;
-        else
-            strokeWidth = 25.f;
+        maximumRingSize = (myWidth/3)/2;
+        maximumTextSize = maximumRingSize;
 
+        float strokeWidth = maximumRingSize * ((float)ringSizePercent/100.f);
+
+        mArcPaint.setStrokeWidth(strokeWidth);
 
         if (_bShowBackground)
             mBackgroundPaint.setColor(backgroundColor);
@@ -164,14 +173,17 @@ public class DrawableWatchFace {
         // Draw our background / wipe the screen
         canvas.drawRect(bounds, mBackgroundPaint);
 
-        RectF secondsOval = new RectF();
-        RectF minutesOval = new RectF();
         RectF hoursOval = new RectF();
+        RectF minutesOval = new RectF();
+        RectF secondsOval = new RectF();
 
         //Define our colored radian zones
-        hoursOval.set(strokeWidth, strokeWidth, myWidth - (strokeWidth), myWidth - (strokeWidth));
-        minutesOval.set(strokeWidth * (float)2.5, strokeWidth * (float)2.5, myWidth - (strokeWidth * (float)2.5), myWidth - (strokeWidth * (float)2.5));
-        secondsOval.set(strokeWidth * (float)4, strokeWidth * (float)4, myWidth - (strokeWidth * (float)4), myWidth - (strokeWidth * (float)4));
+        float hourStrokeOffset = maximumRingSize/2;
+        float minuteStrokeOffset = maximumRingSize * (float)1.5;
+        float secondStrokeOffset = maximumRingSize * (float)2.5;
+        hoursOval.set(hourStrokeOffset, hourStrokeOffset, myWidth - (hourStrokeOffset), myWidth - (hourStrokeOffset));
+        minutesOval.set(minuteStrokeOffset, minuteStrokeOffset, myWidth - (minuteStrokeOffset), myWidth - (minuteStrokeOffset));
+        secondsOval.set(secondStrokeOffset, secondStrokeOffset, myWidth - (secondStrokeOffset), myWidth - (secondStrokeOffset));
 
         //Define our colored radian lengths
         Path secondsPath = new Path();
@@ -210,6 +222,9 @@ public class DrawableWatchFace {
         Path hoursLabelPath = new Path();
         hoursLabelPath.addArc(hoursOval, -90, 90);
 
+        /*Paint whitePaint = new Paint();
+        whitePaint.setColor(0xFFFFFFFF);
+        canvas.drawRect(hoursOval, whitePaint);*/
         //If we don't need grayscale in ambient mode, do this the normal way...
         if (!bGrayAmbient || this.mActive) {
             //Draw our colored radians after setting the color...
@@ -254,6 +269,9 @@ public class DrawableWatchFace {
                 displaySeconds = "0" + displaySeconds;
         }
 
+        float textSize = maximumTextSize * (textSizePercent/100.f);
+        textRadians = (textAngle + (textSize/4)) * (float)(3.14159/180);
+
         //The math for horizontal offset is r * cos(t) where r is radius and t is radians
         float secondsXOffset = (float) ((secondsOval.width()/2)*Math.cos(textRadians));
         float minutesXOffset = (float) ((minutesOval.width()/2)*Math.cos(textRadians));
@@ -262,6 +280,16 @@ public class DrawableWatchFace {
         mFontPaint.setColor(textColor);
 
         if (bTextEnabled) {
+            mFontStrokePaint.setTextSize(textSize);
+            mFontPaint.setTextSize(textSize);
+
+            //Vertical offset is based on device size...apparently...
+            int vOffset;
+            if (myWidth >= 320)
+                vOffset = 10;
+            else
+                vOffset = 5;
+
             //If we have to draw a stroke, we need another paint...
             //Draw stroke in ambient so it's visible
             if ((bTextStroke && mActive) || (bGrayAmbient && !mActive)){
@@ -272,36 +300,19 @@ public class DrawableWatchFace {
                     mFontStrokePaint.setColor(textStrokeColor);
                 }
 
-                //Text draws differ based on device size...
-                if (myWidth >= 320) {
-                    if (this.mActive)
-                        canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, 10, mFontStrokePaint);
-                    canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, 10, mFontStrokePaint);
-                    canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 10, mFontStrokePaint);
-                }
-                else {
-                    if (this.mActive)
-                        canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, 5, mFontStrokePaint);
-                    canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, 5, mFontStrokePaint);
-                    canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 5, mFontStrokePaint);
-                }
+                if (this.mActive)
+                    canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, vOffset, mFontStrokePaint);
+                canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, vOffset, mFontStrokePaint);
+                canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, vOffset, mFontStrokePaint);
             }
             //Override normal color for high contrast ambient mode
             if (!mActive && bGrayAmbient)
                 mFontPaint.setColor(0xFF000000);
-            //Text draws differ based on device size...
-            if (myWidth >= 320) {
-                if (this.mActive)
-                    canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, 10, mFontPaint);
-                canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, 10, mFontPaint);
-                canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 10, mFontPaint);
-            } else {
-                mFontPaint.setTextSize(20);
-                if (this.mActive)
-                    canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, 5, mFontPaint);
-                canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, 5, mFontPaint);
-                canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, 5, mFontPaint);
-            }
+
+            if (this.mActive)
+                canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, vOffset, mFontPaint);
+            canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, vOffset, mFontPaint);
+            canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, vOffset, mFontPaint);
         }
     }
 }

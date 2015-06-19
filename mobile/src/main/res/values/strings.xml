@@ -14,6 +14,7 @@
     <string name="ok_no_device_connected">OK</string>
 
     <string name="color_options">Set Colors</string>
+
     <string name="text_options">Text Options</string>
     <string name="set_text_color">Set Text Color...</string>
     <string name="set_text_stroke_color">Set Text Stroke Color...</string>
@@ -24,8 +25,11 @@
     <string name="military_time">24 Hour Time</string>
     <string name="invert_text">Invert Text Colors</string>
     <string name="text_stroke">Show Text Stroke</string>
+    <string name="text_size">Set Text Size</string>
 
     <string name="display_options">Display Options</string>
     <string name="sm_sec">Smooth Seconds Animation</string>
     <string name="gray_ambient">Grayscale on Ambient</string>
+
+    <string name="ring_size">Set Ring Size</string>
 </resources>

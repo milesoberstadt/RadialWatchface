@@ -252,6 +252,12 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                     if (dm.containsKey("24hourtime")){
                         faceDrawer.b24HourTime = dm.getBoolean("24hourtime");
                     }
+                    if (dm.containsKey("ringSizePercent")){
+                        faceDrawer.ringSizePercent = dm.getInt("ringSizePercent");
+                    }
+                    if (dm.containsKey("textSizePercent")){
+                        faceDrawer.textSizePercent = dm.getInt("textSizePercent");
+                    }
                 }
             }
 

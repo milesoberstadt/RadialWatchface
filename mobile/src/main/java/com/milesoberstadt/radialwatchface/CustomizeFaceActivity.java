@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -38,7 +39,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
     private Button pickFaceButton, pickCustomButton, swapTextStrokeButton;
     private View pickTextColorButton, pickTextStrokeButton, pickBackgroundButton;
-
+    private SeekBar textSizeSeek, ringSizeSeek;
 
     private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
 
@@ -130,6 +131,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         pickTextStrokeButton = findViewById(R.id.stroke_color_preview);
         pickBackgroundButton = findViewById(R.id.bg_color_preview);
 
+        textSizeSeek = (SeekBar) findViewById(R.id.text_size_seek);
+        ringSizeSeek = (SeekBar) findViewById(R.id.ring_size_seek);
+
         //Define switches
         textSwitch = (Switch) findViewById(R.id.text_switch);
         militarySwitch = (Switch) findViewById(R.id.military_switch);
@@ -169,9 +173,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        pickCustomButton.setOnClickListener(new View.OnClickListener(){
+        pickCustomButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 showColorPicker();
             }
 
@@ -214,6 +218,48 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             @Override
             public void onClick(View view) {
                 showBGColorPicker();
+            }
+        });
+
+        textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
+        textSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.d(TAG, "Text Size: " + progress);
+                watchView.faceDrawer.textSizePercent = progress;
+
+                sendAllSettings();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
+        ringSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.d(TAG, "Ring Size: " + progress);
+                watchView.faceDrawer.ringSizePercent= progress;
+
+                sendAllSettings();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
 
@@ -388,6 +434,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         dataMap2.getDataMap().putBoolean("strokeText", watchView.faceDrawer.bTextStroke);
         dataMap2.getDataMap().putBoolean("smoothAnim", watchView.faceDrawer.bShowMilli);
         dataMap2.getDataMap().putBoolean("grayAmbient", watchView.faceDrawer.bGrayAmbient);
+        dataMap2.getDataMap().putInt("ringSizePercent", watchView.faceDrawer.ringSizePercent);
+        dataMap2.getDataMap().putInt("textSizePercent", watchView.faceDrawer.textSizePercent);
 
         PutDataRequest request2 = dataMap2.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult2 = Wearable.DataApi
