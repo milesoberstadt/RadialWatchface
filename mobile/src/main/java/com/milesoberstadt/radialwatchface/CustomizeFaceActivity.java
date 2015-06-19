@@ -2,17 +2,24 @@ package com.milesoberstadt.radialwatchface;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -33,6 +40,10 @@ import com.google.android.gms.wearable.Wearable;
 
 public class CustomizeFaceActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         ResultCallback<DataApi.DataItemResult> {
+
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private String[] mDrawerSections;
 
     private CanvasDrawnRingView watchView;
     private TextView watchLabel;
@@ -74,48 +85,26 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private String mPeerId;
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
 
-
-    // Depreciated: Use sendAllSettings()
-    /*private void commitColors(String col1, String col2, String col3, String displayName){
-
-        watchView.faceDrawer.color1 = Color.parseColor(col1);
-        watchView.faceDrawer.color2 = Color.parseColor(col2);
-        watchView.faceDrawer.color3 = Color.parseColor(col3);
-        watchView.faceDrawer.colorComboName = displayName;
-        //Disable this feature until it's ready for primetime
-        //watchView.faceDrawer.bShowMilli = false;
-
-        PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
-        dataMap.getDataMap().putString("color1", col1);
-        dataMap.getDataMap().putString("color2", col2);
-        dataMap.getDataMap().putString("color3", col3);
-        PutDataRequest request = dataMap.asPutDataRequest();
-        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
-                .putDataItem(mGoogleApiClient, request);
-
-        pendingResult.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-            @Override
-            public void onResult(DataApi.DataItemResult dataItemResult) {
-                if (dataItemResult.getStatus().isSuccess()) {
-                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
-                }
-                else
-                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
-            }
-        });
-
-
-        watchView.faceDrawer.saveSettings(getApplicationContext());
-    }*/
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_customize_face);
+        setContentView(R.layout.activity_drawer);
 
         Log.d(TAG, "onCreate");
 
-        watchView = (CanvasDrawnRingView) findViewById(R.id.watchView);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.drawer_list);
+        mDrawerSections = getResources().getStringArray(R.array.section_names);
+
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item_drawer, mDrawerSections));
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                setNavItem(position);
+            }
+        });
+
+        /*watchView = (CanvasDrawnRingView) findViewById(R.id.watchView);
 
         //TODO: Migrate all setting strings to @string vals
 
@@ -336,7 +325,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 //Nothing to display (phone can't be ambient) just send changes...
                 sendAllSettings();
             }
-        });
+        });*/
     }
 
     @Override
@@ -393,6 +382,24 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     protected void onDestroy() {
         super.onDestroy();
         mGoogleApiClient.disconnect();
+    }
+
+    private void setNavItem(int position){
+        //Create a new fragment and specify settings page to open
+        Fragment fragment = new CustomizeFaceFragment();
+        Bundle args = new Bundle();
+        args.putInt(CustomizeFaceFragment.ARG_NAV_INDEX, position);
+        fragment.setArguments(args);
+
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+
+        //Highlight the selected item
+        mDrawerList.setItemChecked(position, true);
+        setTitle(mDrawerSections[position]);
     }
 
     private void sendAllSettings(){
