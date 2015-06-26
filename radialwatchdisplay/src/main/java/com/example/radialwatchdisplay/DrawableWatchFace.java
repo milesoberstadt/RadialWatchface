@@ -178,9 +178,21 @@ public class DrawableWatchFace {
         RectF secondsOval = new RectF();
 
         //Define our colored radian zones
-        float hourStrokeOffset = maximumRingSize/2;
-        float minuteStrokeOffset = maximumRingSize * (float)1.5;
-        float secondStrokeOffset = maximumRingSize * (float)2.5;
+        //Rings get drawn around these rects where the center of the ring is the outside edge of the rect
+        float totalMaxSize = maximumRingSize * 3;
+        float ourTotalSize = strokeWidth * 3;
+
+        float leftoverSpace = totalMaxSize - ourTotalSize;
+        float ringPadding = Math.min(15.f, leftoverSpace/3);
+
+        float hourStrokeOffset = ringPadding+(strokeWidth/2);
+        float minuteStrokeOffset = (ringPadding*2.f) + (strokeWidth * (float)1.5);
+        float secondStrokeOffset = (ringPadding*3.f) + (strokeWidth * (float)2.5);
+
+        //float hourStrokeOffset = maximumRingSize/2;
+        //float minuteStrokeOffset = maximumRingSize * (float)1.5;
+        //float secondStrokeOffset = maximumRingSize * (float)2.5;
+
         hoursOval.set(hourStrokeOffset, hourStrokeOffset, myWidth - (hourStrokeOffset), myWidth - (hourStrokeOffset));
         minutesOval.set(minuteStrokeOffset, minuteStrokeOffset, myWidth - (minuteStrokeOffset), myWidth - (minuteStrokeOffset));
         secondsOval.set(secondStrokeOffset, secondStrokeOffset, myWidth - (secondStrokeOffset), myWidth - (secondStrokeOffset));
