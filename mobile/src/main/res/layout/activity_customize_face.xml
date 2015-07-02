@@ -20,21 +20,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-            <SeekBar
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/text_size_seek" />
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/display_options"
-                android:id="@+id/display_text_View"
-                style="?android:listSeparatorTextViewStyle"
-                />
-
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -190,6 +175,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/text_size"/>
+
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_size_seek" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/display_options"
+                android:id="@+id/display_text_View"
+                style="?android:listSeparatorTextViewStyle"
+                />
 
             <Switch
                 android:layout_width="match_parent"
