@@ -45,7 +45,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private TextView watchLabel;
 
     private Button pickFaceButton, pickCustomButton, swapTextStrokeButton;
-    private View pickTextColorButton, pickTextStrokeButton, pickBackgroundButton;
+    private CircleView pickBackgroundButton, pickTextColorButton, pickTextStrokeButton;
     private SeekBar textSizeSeek, ringSizeSeek;
 
     private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
@@ -100,9 +100,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
         pickCustomButton = (Button) findViewById(R.id.changeCustomFace);
         swapTextStrokeButton = (Button) findViewById(R.id.swap_color_button);
-        pickTextColorButton = findViewById(R.id.text_color_preview);
-        pickTextStrokeButton = findViewById(R.id.stroke_color_preview);
-        pickBackgroundButton = findViewById(R.id.bg_color_preview);
+        pickTextColorButton = (CircleView) findViewById(R.id.text_color_preview);
+        pickTextStrokeButton = (CircleView) findViewById(R.id.stroke_color_preview);
+        pickBackgroundButton = (CircleView) findViewById(R.id.bg_color_preview);
 
         textSizeSeek = (SeekBar) findViewById(R.id.text_size_seek);
         ringSizeSeek = (SeekBar) findViewById(R.id.ring_size_seek);
@@ -154,7 +154,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         });
 
-        pickTextColorButton.setBackgroundColor(watchView.faceDrawer.textColor);
+        pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
+        pickTextColorButton.invalidate();
         pickTextColorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,7 +163,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        pickTextStrokeButton.setBackgroundColor(watchView.faceDrawer.textStrokeColor);
+        pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
+        pickTextStrokeButton.invalidate();
         pickTextStrokeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -179,14 +181,17 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 watchView.faceDrawer.textStrokeColor = oldText;
                 watchView.faceDrawer.textColor = oldStroke;
 
-                pickTextColorButton.setBackgroundColor(watchView.faceDrawer.textColor);
-                pickTextStrokeButton.setBackgroundColor(watchView.faceDrawer.textStrokeColor);
+                pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
+                pickTextColorButton.invalidate();
+                pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
+                pickTextStrokeButton.invalidate();
 
                 sendAllSettings();
             }
         });
 
-        pickBackgroundButton.setBackgroundColor(watchView.faceDrawer.backgroundColor);
+        pickBackgroundButton.circleFillColor = watchView.faceDrawer.backgroundColor;
+        pickBackgroundButton.invalidate();
         pickBackgroundButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -498,8 +503,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 // TODO: Find somewhere in settings to have settings for defaults for these in templates
                 watchView.faceDrawer.textColor = 0xFFFFFFFF;
                 watchView.faceDrawer.textStrokeColor = 0xFF000000;
-                pickTextColorButton.setBackgroundColor(watchView.faceDrawer.textColor);
-                pickTextStrokeButton.setBackgroundColor(watchView.faceDrawer.textStrokeColor);
+                pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
+                pickTextColorButton.invalidate();
+                pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
+                pickTextStrokeButton.invalidate();
 
                 watchView.faceDrawer.colorComboName = displayName;
 
@@ -521,7 +528,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "BG color selected: "+String.valueOf(color));
                 watchView.faceDrawer.backgroundColor = color;
-                pickBackgroundButton.setBackgroundColor(color);
+                pickBackgroundButton.circleFillColor = color;
+                pickBackgroundButton.invalidate();
                 watchView.faceDrawer.saveSettings(getApplicationContext());
                 sendAllSettings();
             }
@@ -540,7 +548,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "Text color selected: "+String.valueOf(color));
                 watchView.faceDrawer.textColor = color;
-                pickTextColorButton.setBackgroundColor(color);
+                pickTextColorButton.circleFillColor = color;
+                pickTextColorButton.invalidate();
                 watchView.faceDrawer.saveSettings(getApplicationContext());
                 sendAllSettings();
             }
@@ -559,7 +568,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "Text stroke selected: "+String.valueOf(color));
                 watchView.faceDrawer.textStrokeColor = color;
-                pickTextStrokeButton.setBackgroundColor(color);
+                pickTextStrokeButton.circleFillColor = color;
+                pickTextStrokeButton.invalidate();
                 watchView.faceDrawer.saveSettings(getApplicationContext());
                 sendAllSettings();
             }

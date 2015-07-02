@@ -1,5 +1,6 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:circleview="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -87,13 +88,14 @@
                 android:gravity="center"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp">
-                <View
+                <com.milesoberstadt.radialwatchface.CircleView
                     android:layout_width="50dp"
                     android:layout_height="50dp"
+                    circleview:fillColor="#00FFFFFF"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                    android:background="#00FFFFFF"
-                    android:id="@+id/bg_color_preview" />
+                    android:id="@+id/bg_color_preview"
+                    />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -112,10 +114,10 @@
                     android:orientation="vertical"
                     android:gravity="center"
                     android:layout_weight="1">
-                    <View
+                    <com.milesoberstadt.radialwatchface.CircleView
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:background="#00FFFFFF"
+                        circleview:fillColor="#00FFFFFF"
                         android:id="@+id/text_color_preview" />
                     <TextView
                         android:layout_width="fill_parent"
@@ -137,10 +139,10 @@
                     android:orientation="vertical"
                     android:gravity="center"
                     android:layout_weight="1">
-                    <View
+                    <com.milesoberstadt.radialwatchface.CircleView
                         android:layout_width="50dp"
                         android:layout_height="50dp"
-                        android:background="#00FFFFFF"
+                        circleview:fillColor="#00FFFFFF"
                         android:id="@+id/stroke_color_preview" />
                     <TextView
                         android:layout_width="fill_parent"
