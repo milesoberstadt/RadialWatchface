@@ -19,7 +19,7 @@ import java.util.Calendar;
  */
 public class CanvasDrawnRingView extends View{
 
-    private Rect mySize = new Rect(0,0,320,320);
+    private Rect mySize;
 
     private Calendar time;
 
@@ -56,9 +56,11 @@ public class CanvasDrawnRingView extends View{
         faceDrawer.color3 = a.getColor(R.styleable.radialColors_second_color, faceDrawer.color3);
         a.recycle();
 
-        init();
+        if (!isInEditMode()){
+            init();
 
-        graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
+            graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
+        }
     }
 
     private void init(){
@@ -67,7 +69,9 @@ public class CanvasDrawnRingView extends View{
 
     protected void onDraw(Canvas canvas) {
 
-        faceDrawer.draw(canvas, time, mySize);
+        mySize = new Rect(0,0,getWidth(),getWidth());
+        if (!isInEditMode())
+            faceDrawer.draw(canvas, time, mySize);
     }
 
     protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec){
@@ -77,9 +81,9 @@ public class CanvasDrawnRingView extends View{
         //int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
 
         //your desired sizes, converted from pixels to setMeasuredDimension's unit
-        final int desiredWSpec = MeasureSpec.makeMeasureSpec(mySize.width(), MeasureSpec.EXACTLY);
-        final int desiredHSpec = MeasureSpec.makeMeasureSpec(mySize.height(), MeasureSpec.EXACTLY);
-        this.setMeasuredDimension(desiredWSpec, desiredHSpec);
+        //final int desiredWSpec = MeasureSpec.makeMeasureSpec(mySize.width(), MeasureSpec.EXACTLY);
+        //final int desiredHSpec = MeasureSpec.makeMeasureSpec(mySize.height(), MeasureSpec.EXACTLY);
+        this.setMeasuredDimension(widthMeasureSpec, widthMeasureSpec);
     }
 
     public void updateSystemTime(){

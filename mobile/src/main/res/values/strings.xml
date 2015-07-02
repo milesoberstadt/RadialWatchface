@@ -5,6 +5,9 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="done">Done</string>
+
+    <string name="preview">Preview</string>
+
     <string name="watch_color_header">Watch Color Scheme</string>
     <string name="set_face">Change Face...</string>
     <string name="set_custom">Set Custom Scheme...</string>
@@ -33,16 +36,4 @@
 
     <string name="ring_size">Set Ring Size</string>
 
-    <string name="section_theme">Theme</string>
-    <string name="section_text">Text Options</string>
-    <string name="section_colors">Colors</string>
-    <string name="section_other">Other</string>
-
-    <string-array
-        name="section_names">
-        <item>@string/section_theme</item>
-        <item>@string/section_text</item>
-        <item>@string/section_colors</item>
-        <item>@string/section_other</item>
-    </string-array>
 </resources>

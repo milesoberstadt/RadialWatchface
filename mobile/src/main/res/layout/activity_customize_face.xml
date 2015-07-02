@@ -10,9 +10,38 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.milesoberstadt.radialwatchface.CustomizeFaceActivity">
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/preview"
+        style="?android:listSeparatorTextViewStyle"/>
+
+    <!--Wrapper to make the preview 50%-->
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:weightSum="1.0">
+        <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
+            android:layout_weight=".5"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:id="@+id/watchView"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/watchFaceText"
+        android:text="Current Face: RGB"/>
+
     <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp"
+        >
 
 
         <LinearLayout
@@ -29,26 +58,6 @@
                 style="?android:listSeparatorTextViewStyle"
                 />
 
-            <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:id="@+id/currentFace">
-                <com.milesoberstadt.radialwatchface.CanvasDrawnRingView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/watchView"/>
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/activity_horizontal_margin"
-                    android:paddingRight="@dimen/activity_horizontal_margin"
-                    android:paddingTop="@dimen/activity_vertical_margin"
-                    android:paddingBottom="@dimen/activity_vertical_margin"
-                    android:id="@+id/watchFaceText"
-                    android:text="Current Face: RGB"/>
-            </LinearLayout>
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -75,7 +84,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp">
                 <View
@@ -86,7 +95,7 @@
                     android:background="#00FFFFFF"
                     android:id="@+id/bg_color_preview" />
                 <TextView
-                    android:layout_width="fill_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/set_bg"/>
             </LinearLayout>
