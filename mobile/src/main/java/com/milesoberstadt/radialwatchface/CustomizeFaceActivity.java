@@ -41,10 +41,6 @@ import com.google.android.gms.wearable.Wearable;
 public class CustomizeFaceActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         ResultCallback<DataApi.DataItemResult> {
 
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
-    private String[] mDrawerSections;
-
     private CanvasDrawnRingView watchView;
     private TextView watchLabel;
 
@@ -88,23 +84,11 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_drawer);
+        setContentView(R.layout.activity_customize_face);
 
         Log.d(TAG, "onCreate");
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.drawer_list);
-        mDrawerSections = getResources().getStringArray(R.array.section_names);
-
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.list_item_drawer, mDrawerSections));
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                setNavItem(position);
-            }
-        });
-
-        /*watchView = (CanvasDrawnRingView) findViewById(R.id.watchView);
+        watchView = (CanvasDrawnRingView) findViewById(R.id.watchView);
 
         //TODO: Migrate all setting strings to @string vals
 
@@ -325,7 +309,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 //Nothing to display (phone can't be ambient) just send changes...
                 sendAllSettings();
             }
-        });*/
+        });
     }
 
     @Override
@@ -382,24 +366,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     protected void onDestroy() {
         super.onDestroy();
         mGoogleApiClient.disconnect();
-    }
-
-    private void setNavItem(int position){
-        //Create a new fragment and specify settings page to open
-        Fragment fragment = new CustomizeFaceFragment();
-        Bundle args = new Bundle();
-        args.putInt(CustomizeFaceFragment.ARG_NAV_INDEX, position);
-        fragment.setArguments(args);
-
-        // Insert the fragment by replacing any existing fragment
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, fragment)
-                .commit();
-
-        //Highlight the selected item
-        mDrawerList.setItemChecked(position, true);
-        setTitle(mDrawerSections[position]);
     }
 
     private void sendAllSettings(){
