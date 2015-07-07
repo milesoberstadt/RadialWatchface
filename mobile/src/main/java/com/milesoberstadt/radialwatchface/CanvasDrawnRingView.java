@@ -71,7 +71,7 @@ public class CanvasDrawnRingView extends View{
 
         mySize = new Rect(0,0,getWidth(),getWidth());
         if (!isInEditMode())
-            faceDrawer.draw(canvas, time, mySize);
+            faceDrawer.draw(canvas, time, mySize, getContext());
     }
 
     protected void onMeasure (int widthMeasureSpec, int heightMeasureSpec){

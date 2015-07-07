@@ -15,6 +15,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/preview"
+        android:textSize="15dp"
         style="?android:listSeparatorTextViewStyle"/>
 
     <!--Wrapper to make the preview 50%-->
@@ -34,14 +35,24 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:id="@+id/watchFaceText"
         android:text="Current Face: RGB"/>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_settings"
+        android:textSize="15dp"
+        style="?android:listSeparatorTextViewStyle"/>
 
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
+        android:background="#ff202020"
         >
 
 

@@ -84,6 +84,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActionBar().hide();
         setContentView(R.layout.activity_customize_face);
 
         Log.d(TAG, "onCreate");

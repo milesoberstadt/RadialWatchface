@@ -53,6 +53,8 @@ public class DrawableWatchFace {
     float maximumRingSize;
     float maximumTextSize;
 
+    private float defaultPadding; // Originally, on a 320x320 watch, it was 15 px. I want to maintain that ratio...
+
     int myWidth = -1;
     float textAngle = 45;
     float textRadians;
@@ -150,7 +152,7 @@ public class DrawableWatchFace {
         _bShowBackground = state;
     }
 
-    public void draw(Canvas canvas, Calendar mTime, Rect bounds){
+    public void draw(Canvas canvas, Calendar mTime, Rect bounds, Context context){
 
         int hours = mTime.get(Calendar.HOUR_OF_DAY);
         int minutes = mTime.get(Calendar.MINUTE);
@@ -160,6 +162,7 @@ public class DrawableWatchFace {
         myWidth = bounds.width();
         maximumRingSize = (myWidth/3)/2;
         maximumTextSize = maximumRingSize;
+        defaultPadding = myWidth * (float)0.046875; // Golden ratio derived from 15/320
 
         float strokeWidth = maximumRingSize * ((float)ringSizePercent/100.f);
 
@@ -183,7 +186,7 @@ public class DrawableWatchFace {
         float ourTotalSize = strokeWidth * 3;
 
         float leftoverSpace = totalMaxSize - ourTotalSize;
-        float ringPadding = Math.min(15.f, leftoverSpace/3);
+        float ringPadding = Math.min(defaultPadding, leftoverSpace/3);
 
         float hourStrokeOffset = ringPadding+(strokeWidth/2);
         float minuteStrokeOffset = (ringPadding*2.f) + (strokeWidth * (float)1.5);
@@ -282,7 +285,7 @@ public class DrawableWatchFace {
         }
 
         float textSize = maximumTextSize * (textSizePercent/100.f);
-        textRadians = (textAngle + (textSize/4)) * (float)(3.14159/180);
+        textRadians = (textAngle) * (float)(Math.PI/180);
 
         //The math for horizontal offset is r * cos(t) where r is radius and t is radians
         float secondsXOffset = (float) ((secondsOval.width()/2)*Math.cos(textRadians));
@@ -295,12 +298,12 @@ public class DrawableWatchFace {
             mFontStrokePaint.setTextSize(textSize);
             mFontPaint.setTextSize(textSize);
 
-            //Vertical offset is based on device size...apparently...
-            int vOffset;
-            if (myWidth >= 320)
-                vOffset = 10;
-            else
-                vOffset = 5;
+            // By default, text is bottom aligned to the center of the corresponding stroke
+            // Offset by half of the text height and half the stroke size
+            // All text SHOULD be the same height...
+            Rect textBounds = new Rect();
+            mFontPaint.getTextBounds(displayHours, 0, displayHours.length(), textBounds);
+            float vOffset = (textBounds.height()/2);
 
             //If we have to draw a stroke, we need another paint...
             //Draw stroke in ambient so it's visible

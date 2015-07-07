@@ -143,7 +143,7 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
 
             mTime = Calendar.getInstance();
 
-            faceDrawer.draw(canvas, mTime, bounds);
+            faceDrawer.draw(canvas, mTime, bounds, getApplicationContext());
 
             // Draw every frame as long as we're visible and in interactive mode.
             if (isVisible() && !isInAmbientMode()) {
