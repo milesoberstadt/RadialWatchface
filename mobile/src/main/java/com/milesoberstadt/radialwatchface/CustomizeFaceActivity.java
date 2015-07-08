@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,6 +37,8 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+
+import java.util.ArrayList;
 
 
 public class CustomizeFaceActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -138,6 +141,41 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 alertDialog.show();
 
                 LinearLayout watchHolder = (LinearLayout) alertDialog.findViewById(R.id.watchFaceHolder);
+
+                //Build our default colors...
+                Resources res = getResources();
+                ArrayList<Integer> colorArraysToFetch = new ArrayList<>();
+                colorArraysToFetch.add(R.array.watch_rgb_array);
+                colorArraysToFetch.add(R.array.watch_cmy_array);
+                colorArraysToFetch.add(R.array.watch_crayon_array);
+                colorArraysToFetch.add(R.array.watch_gray_array);
+                colorArraysToFetch.add(R.array.watch_pastels_array);
+
+                ArrayList<String> colorNames = new ArrayList<>();
+                colorNames.add("RGB");
+                colorNames.add("CMY");
+                colorNames.add("Crayon");
+                colorNames.add("Grayscale");
+                colorNames.add("Pastels");
+
+                for(int i=0; i<colorArraysToFetch.size(); i++){
+                    String[] colorArray = res.getStringArray(colorArraysToFetch.get(i));
+
+                    View testLayout = LayoutInflater.from(watchHolder.getContext()).inflate(R.layout.watch_preview, null, false);
+                    CanvasDrawnRingView testRing = (CanvasDrawnRingView) (((ViewGroup) testLayout).getChildAt(0));
+
+                    testRing.faceDrawer.color1 = Color.parseColor(colorArray[0]);
+                    testRing.faceDrawer.color2 = Color.parseColor(colorArray[1]);
+                    testRing.faceDrawer.color3 = Color.parseColor(colorArray[2]);
+
+                    TextView titleText = (TextView) (((ViewGroup) testLayout).getChildAt(1));
+                    titleText.setText(colorNames.get(i));
+
+                    watchHolder.addView(testLayout);
+                }
+
+
+
                 int watchCount = watchHolder.getChildCount();
 
                 for (int i = 0; i < watchCount; i++) {
@@ -452,6 +490,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         public void onClick(View view) {
             LinearLayout linearView = null;
             CanvasDrawnRingView clickedView = null;
+            String displayName = "";
 
             if (view instanceof LinearLayout)
             {
@@ -459,62 +498,36 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 if (linearView.getChildAt(0) instanceof CanvasDrawnRingView) {
                     clickedView = (CanvasDrawnRingView) linearView.getChildAt(0);
                 }
+                displayName = ((TextView)linearView.getChildAt(1)).getText().toString();
             }
 
-            if (clickedView == null)
+            if (clickedView == null) {
                 return;
-
-            int viewID = clickedView.getId();
-            //watchFaceCombo = linearView.getResources().getResourceEntryName(viewID);
-            //Log.d("LOLTEST", watchFaceCombo);
-
-            Resources res = getResources();
-            String[] colors = new String[0];
-            String displayName = "";
-            switch (viewID){
-                case R.id.watch_rgb:
-                    colors = res.getStringArray(R.array.watch_rgb_array);
-                    displayName = res.getString(R.string.watch_rgb);
-                    break;
-                case R.id.watch_cmy:
-                    colors = res.getStringArray(R.array.watch_cmy_array);
-                    displayName = res.getString(R.string.watch_cmy);
-                    break;
-                case R.id.watch_gray:
-                    colors = res.getStringArray(R.array.watch_gray_array);
-                    displayName = res.getString(R.string.watch_gray);
-                    break;
-                case R.id.watch_crayon:
-                    colors = res.getStringArray(R.array.watch_crayon_array);
-                    displayName = res.getString(R.string.watch_crayon);
-                    break;
-                case R.id.watch_pastels:
-                    colors = res.getStringArray(R.array.watch_pastels_array);
-                    displayName = res.getString(R.string.watch_pastels);
-                    break;
             }
 
-            if (colors.length == 3){
+            // Duh, just get colors from the rings...
+            int color1 = clickedView.faceDrawer.color1;
+            int color2 = clickedView.faceDrawer.color2;
+            int color3 = clickedView.faceDrawer.color3;
 
-                //commitColors(colors[0],colors[1],colors[2], displayName);
-                watchView.faceDrawer.color1 = Color.parseColor(colors[0]);
-                watchView.faceDrawer.color2 = Color.parseColor(colors[1]);
-                watchView.faceDrawer.color3 = Color.parseColor(colors[2]);
+            watchView.faceDrawer.color1 = color1;
+            watchView.faceDrawer.color2 = color2;
+            watchView.faceDrawer.color3 = color3;
 
-                // TODO: Find somewhere in settings to have settings for defaults for these in templates
-                watchView.faceDrawer.textColor = 0xFFFFFFFF;
-                watchView.faceDrawer.textStrokeColor = 0xFF000000;
-                pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
-                pickTextColorButton.invalidate();
-                pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
-                pickTextStrokeButton.invalidate();
 
-                watchView.faceDrawer.colorComboName = displayName;
+            // TODO: Find somewhere in settings to have settings for defaults for these in templates
+            watchView.faceDrawer.textColor = 0xFFFFFFFF;
+            watchView.faceDrawer.textStrokeColor = 0xFF000000;
+            pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
+            pickTextColorButton.invalidate();
+            pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
+            pickTextStrokeButton.invalidate();
 
-                sendAllSettings();
+            watchView.faceDrawer.colorComboName = displayName;
 
-                watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
-            }
+            sendAllSettings();
+
+            watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
 
             alertDialog.dismiss();
         }
