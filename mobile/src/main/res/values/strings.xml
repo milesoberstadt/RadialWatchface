@@ -34,6 +34,8 @@
     <string name="sm_sec">Smooth Seconds Animation</string>
     <string name="gray_ambient">Grayscale on Ambient</string>
 
+    <string name="add_new">Add New Watchface</string>
+
     <string name="ring_size">Set Ring Size</string>
 
 </resources>

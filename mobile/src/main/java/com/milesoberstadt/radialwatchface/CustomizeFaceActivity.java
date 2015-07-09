@@ -19,8 +19,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -140,7 +143,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 alertDialog = builder.create();
                 alertDialog.show();
 
-                LinearLayout watchHolder = (LinearLayout) alertDialog.findViewById(R.id.watchFaceHolder);
+                final LinearLayout watchHolder = (LinearLayout) alertDialog.findViewById(R.id.watchFaceHolder);
+
+                //Get our whole 'add watch' section as a "button"
+                RelativeLayout addCustomButton = (RelativeLayout) alertDialog.findViewById(R.id.addNewContainer);
 
                 //Build our default colors...
                 Resources res = getResources();
@@ -181,6 +187,24 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 for (int i = 0; i < watchCount; i++) {
                     (watchHolder.getChildAt(i)).setOnClickListener(watchClicked);
                 }
+
+                addCustomButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Make a new custom view and add it!
+                        final View customRingLayout = LayoutInflater.from(watchHolder.getContext()).inflate(R.layout.watch_preview_custom, null, false);
+                        ImageView deleteButton = (ImageView) ((ViewGroup) customRingLayout).getChildAt(2);
+
+                        deleteButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                watchHolder.removeView(customRingLayout);
+                            }
+                        });
+
+                        watchHolder.addView(customRingLayout);
+                    }
+                });
 
             }
         });
@@ -264,7 +288,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 Log.d(TAG, "Ring Size: " + progress);
-                watchView.faceDrawer.ringSizePercent= progress;
+                watchView.faceDrawer.ringSizePercent = progress;
 
                 sendAllSettings();
             }
