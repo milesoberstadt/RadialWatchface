@@ -21,6 +21,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.chiralcode.colorpicker.ColorPickerDialog;
+import com.example.radialwatchdisplay.DrawableWatchFace;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -163,6 +164,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     testRing.faceDrawer.color2 = Color.parseColor(colorArray[1]);
                     testRing.faceDrawer.color3 = Color.parseColor(colorArray[2]);
 
+                    testRing.faceDrawer.colorComboName = colorNames[i];
+
                     TextView titleText = (TextView) (((ViewGroup) testLayout).getChildAt(1));
                     titleText.setText(colorNames[i]);
 
@@ -196,6 +199,12 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     customRing.faceDrawer.bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
                     customRing.faceDrawer.b24HourTime = customFace.get("24hourtime").getAsBoolean();
 
+                    customRing.faceDrawer.colorComboName = "Custom "+(i+1);
+
+                    // Update the name display
+                    TextView customText = (TextView) (((ViewGroup) customRingLayout).getChildAt(1));
+                    customText.setText(customRing.faceDrawer.colorComboName);
+
                     ImageView deleteButton = (ImageView) ((ViewGroup) customRingLayout).getChildAt(2);
 
                     deleteButton.setOnClickListener(new View.OnClickListener() {
@@ -220,7 +229,14 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                         // Make a new custom view and add it!
                         final View customRingLayout = LayoutInflater.from(watchHolder.getContext()).inflate(R.layout.watch_preview_custom, null, false);
                         CanvasDrawnRingView customRing = (CanvasDrawnRingView) (((ViewGroup) customRingLayout).getChildAt(0));
+                        //Update the view
+                        copySettingsFromOneFaceToAnother(watchView.faceDrawer, customRing.faceDrawer);
+
                         customRing.faceDrawer.colorComboName = "Custom "+(watchView.faceDrawer.customRings.size()+1);
+
+                        TextView customText = (TextView) (((ViewGroup) customRingLayout).getChildAt(1));
+                        //Update the actual text view...
+                        customText.setText(customRing.faceDrawer.colorComboName);
                         watchView.faceDrawer.addUpdateCustomRing(watchHolder.getContext(), watchView.faceDrawer.customRings.size());
 
                         ImageView deleteButton = (ImageView) ((ViewGroup) customRingLayout).getChildAt(2);
@@ -232,6 +248,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                             }
                         });
 
+                        customRingLayout.setOnClickListener(watchClicked);
                         watchHolder.addView(customRingLayout);
                     }
                 });
@@ -559,25 +576,22 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 return;
             }
 
-            // Duh, just get colors from the rings...
-            int color1 = clickedView.faceDrawer.color1;
-            int color2 = clickedView.faceDrawer.color2;
-            int color3 = clickedView.faceDrawer.color3;
-
-            watchView.faceDrawer.color1 = color1;
-            watchView.faceDrawer.color2 = color2;
-            watchView.faceDrawer.color3 = color3;
-
-
             // TODO: Find somewhere in settings to have settings for defaults for these in templates
-            watchView.faceDrawer.textColor = 0xFFFFFFFF;
-            watchView.faceDrawer.textStrokeColor = 0xFF000000;
-            pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
+            copySettingsFromOneFaceToAnother(clickedView.faceDrawer, watchView.faceDrawer);
+
+            pickTextColorButton.circleFillColor = clickedView.faceDrawer.textColor;
             pickTextColorButton.invalidate();
-            pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
+            pickTextStrokeButton.circleFillColor = clickedView.faceDrawer.textStrokeColor;
             pickTextStrokeButton.invalidate();
 
-            watchView.faceDrawer.colorComboName = displayName;
+            textSwitch.setChecked(watchView.faceDrawer.bTextEnabled);
+            strokeSwitch.setChecked(watchView.faceDrawer.bTextStroke);
+            militarySwitch.setChecked(watchView.faceDrawer.b24HourTime);
+            smoothSwitch.setChecked(watchView.faceDrawer.bShowMilli);
+            graySwitch.setChecked(watchView.faceDrawer.bGrayAmbient);
+
+            textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
+            ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
 
             sendAllSettings();
 
@@ -769,5 +783,29 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         }*/
     }
 
+    public void copySettingsFromOneFaceToAnother(DrawableWatchFace originFace, DrawableWatchFace destinationFace){
+        // Duh, just get colors from the rings...
+        int color1 = originFace.color1;
+        int color2 = originFace.color2;
+        int color3 = originFace.color3;
+
+        destinationFace.color1 = color1;
+        destinationFace.color2 = color2;
+        destinationFace.color3 = color3;
+
+        destinationFace.textColor = originFace.textColor;
+        destinationFace.textStrokeColor = originFace.textStrokeColor;
+
+        destinationFace.bTextEnabled = originFace.bTextEnabled;
+        destinationFace.bTextStroke = originFace.bTextStroke;
+        destinationFace.b24HourTime = originFace.b24HourTime;
+        destinationFace.bShowMilli = originFace.bShowMilli;
+        destinationFace.bGrayAmbient = originFace.bGrayAmbient;
+
+        destinationFace.textSizePercent = originFace.textSizePercent;
+        destinationFace.ringSizePercent = originFace.ringSizePercent;
+
+        destinationFace.colorComboName = originFace.colorComboName;
+    }
 
 }

@@ -160,6 +160,16 @@ public class DrawableWatchFace {
                     customRings.add(((String) customStrings[i]));
                 }
             }
+            //If we're using new settings, but have no custom rings, check yourself before you rek yourself
+            else{
+                //Check for an invalid face...
+                if (colorComboName.indexOf("Custom") != -1) {
+                    colorComboName = "RGB";
+                    resetDefaultStyle();
+                    return;
+                }
+            }
+
 
             // If we're using a built in face, load it's settings!
             if (colorComboName.indexOf("Custom") == -1){
@@ -290,6 +300,7 @@ public class DrawableWatchFace {
         Set<String> customRingsStringSet = new HashSet<String>(customRings);
 
         editor.putStringSet("customRings", customRingsStringSet);
+        editor.apply();
     }
 
     public void setAmbient(Boolean state){
