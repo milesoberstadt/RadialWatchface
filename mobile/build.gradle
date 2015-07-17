@@ -26,4 +26,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:7.3.0'
     compile 'com.android.support:support-v13:21.0.0'
     compile project(':radialwatchdisplay')
+    compile 'com.google.code.gson:gson:2.3.1'
 }

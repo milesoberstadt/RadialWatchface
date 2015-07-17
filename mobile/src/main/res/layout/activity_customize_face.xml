@@ -30,15 +30,24 @@
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:id="@+id/watchView"/>
+
+        <TextView
+            android:layout_width="0dip"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:id="@+id/watchFaceText"
+            android:text="Current Face: RGB"
+            android:layout_margin="10dp" />
+
     </LinearLayout>
 
-    <TextView
-        android:layout_width="fill_parent"
+    <Button
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:id="@+id/watchFaceText"
-        android:text="Current Face: RGB"/>
+        android:text="@string/set_face"
+        android:id="@+id/changeFaceButton"/>
 
     <TextView
         android:layout_width="fill_parent"
@@ -61,26 +70,11 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/watch_color_header"
-                android:id="@+id/colorTextView"
-                style="?android:listSeparatorTextViewStyle"
-                />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_face"
-                android:id="@+id/changeFaceButton"/>
-
-            <Button
+            <!--<Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_custom"
-                android:id="@+id/changeCustomFace"/>
+                android:id="@+id/changeCustomFace"/>-->
 
             <TextView
                 android:layout_width="fill_parent"
@@ -91,6 +85,67 @@
                 android:id="@+id/option_colors"
                 style="?android:listSeparatorTextViewStyle"
                 />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="left|center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp">
+                <com.milesoberstadt.radialwatchface.CircleView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    circleview:fillColor="#00FFFFFF"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:id="@+id/bg_color_ring1"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_ring_1"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="left|center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp">
+                <com.milesoberstadt.radialwatchface.CircleView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    circleview:fillColor="#00FFFFFF"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:id="@+id/bg_color_ring2"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_ring_2"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="left|center"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp">
+                <com.milesoberstadt.radialwatchface.CircleView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    circleview:fillColor="#00FFFFFF"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:id="@+id/bg_color_ring3"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change_ring_3"/>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="fill_parent"
