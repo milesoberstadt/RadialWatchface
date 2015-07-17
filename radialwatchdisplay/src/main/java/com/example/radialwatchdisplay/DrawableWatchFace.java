@@ -2,14 +2,24 @@ package com.example.radialwatchdisplay;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.preference.PreferenceManager;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by miles on 6/9/15.
@@ -39,6 +49,10 @@ public class DrawableWatchFace {
     public int textSizePercent = 50;
 
     public String colorComboName = "RGB";
+
+    public Gson gson = new Gson();
+    //public JSONArray customRings = new JSONArray();
+    public ArrayList<String> customRings = new ArrayList<>();
 
     private Boolean _bShowBackground = true;
 
@@ -83,6 +97,25 @@ public class DrawableWatchFace {
         setBShowBackground(_bShowBackground);
     }
 
+    public void resetDefaultStyle(){
+        color1 = 0xFFe51c23;
+        color2 = 0xFF8bc34a;
+        color3 = 0xFF03a9f4;
+        backgroundColor = 0xFF000000;
+
+        textColor = 0xFFFFFFFF;
+        textStrokeColor = 0xFF000000;
+
+        ringSizePercent = 50;
+        textSizePercent = 50;
+
+        bTextEnabled = true;
+        bTextStroke = false;
+        bShowMilli = false;
+        bGrayAmbient = false;
+        b24HourTime = false;
+    }
+
     public void loadSettings(Context context){
         settings = PreferenceManager.getDefaultSharedPreferences(context);
         //editor = settings.edit();
@@ -91,34 +124,98 @@ public class DrawableWatchFace {
         int tmp2 = settings.getInt("ringColor2", -1);
         int tmp3 = settings.getInt("ringColor3", -1);
 
-        if (tmp1 != -1)
-            color1 = tmp1;
-        if (tmp2 != -1)
-            color2 = tmp2;
-        if (tmp3 != -1)
-            color3 = tmp3;
+        // If we've got these, we're using legacy settings, if not, let's use new stuff.
+        if (tmp1 != -1 && tmp2 != -1 && tmp3 != -1){
+            if (tmp1 != -1)
+                color1 = tmp1;
+            if (tmp2 != -1)
+                color2 = tmp2;
+            if (tmp3 != -1)
+                color3 = tmp3;
 
-        backgroundColor = settings.getInt("bg", backgroundColor);
-        textColor = settings.getInt("textColor", textColor);
-        textStrokeColor = settings.getInt("textStrokeColor", textStrokeColor);
-        ringSizePercent = settings.getInt("ringSizePercent", ringSizePercent);
-        textSizePercent = settings.getInt("textSizePercent", textSizePercent);
+            backgroundColor = settings.getInt("bg", backgroundColor);
+            textColor = settings.getInt("textColor", textColor);
+            textStrokeColor = settings.getInt("textStrokeColor", textStrokeColor);
+            ringSizePercent = settings.getInt("ringSizePercent", ringSizePercent);
+            textSizePercent = settings.getInt("textSizePercent", textSizePercent);
 
-        colorComboName = settings.getString("watchFaceCombo", "RGB");
+            colorComboName = settings.getString("watchFaceCombo", "RGB");
 
-        //Get text options
-        bTextEnabled = settings.getBoolean("enableText", true);
-        bTextStroke = settings.getBoolean("strokeText", false);
-        bShowMilli = settings.getBoolean("smoothAnim", false);
-        bGrayAmbient = settings.getBoolean("grayAmbient", false);
-        b24HourTime = settings.getBoolean("24hourtime", false);
+            //Get text options
+            bTextEnabled = settings.getBoolean("enableText", true);
+            bTextStroke = settings.getBoolean("strokeText", false);
+            bShowMilli = settings.getBoolean("smoothAnim", false);
+            bGrayAmbient = settings.getBoolean("grayAmbient", false);
+            b24HourTime = settings.getBoolean("24hourtime", false);
+        }
+        // Otherwise, use new settings...
+        else{
+            colorComboName = settings.getString("watchFaceCombo", "RGB");
+
+            Set<String> customRingsStringSet = new HashSet<String>();
+            customRingsStringSet = settings.getStringSet("customRings", customRingsStringSet);
+            if (!customRingsStringSet.isEmpty()){
+                Object[] customStrings = customRingsStringSet.toArray();
+                for (int i=0; i<customStrings.length; i++){
+                    customRings.add(((String) customStrings[i]));
+                }
+            }
+
+            // If we're using a built in face, load it's settings!
+            if (colorComboName.indexOf("Custom") == -1){
+                Resources res = context.getResources();
+                ArrayList<Integer> colorArraysToFetch = new ArrayList<>();
+                colorArraysToFetch.add(R.array.watch_rgb_array);
+                colorArraysToFetch.add(R.array.watch_cmy_array);
+                colorArraysToFetch.add(R.array.watch_crayon_array);
+                colorArraysToFetch.add(R.array.watch_gray_array);
+                colorArraysToFetch.add(R.array.watch_pastels_array);
+
+                String[] colorNames = res.getStringArray(R.array.watch_faces);
+                int facePos = Arrays.asList(colorNames).indexOf(colorComboName);
+                if (facePos > -1){
+                    resetDefaultStyle();
+
+                    String[] colors = res.getStringArray(colorArraysToFetch.get(facePos));
+                    color1 = Color.parseColor(colors[0]);
+                    color2 = Color.parseColor(colors[1]);
+                    color3 = Color.parseColor(colors[2]);
+                }
+            }
+            // Otherwise, load settings from our custom ring...
+            else{
+                JsonParser parser = new JsonParser();
+                int customIndex = Integer.parseInt(colorComboName.split("Custom ")[1]) - 1;
+                JsonObject customFace = (JsonObject) parser.parse(customRings.get(customIndex));
+
+                color1 = customFace.get("ringColor1").getAsInt();
+                color2 = customFace.get("ringColor2").getAsInt();
+                color3 = customFace.get("ringColor3").getAsInt();
+
+                backgroundColor = customFace.get("bg").getAsInt();
+                textColor = customFace.get("textColor").getAsInt();
+                textStrokeColor = customFace.get("textStrokeColor").getAsInt();
+
+                ringSizePercent = customFace.get("ringSizePercent").getAsInt();
+                textSizePercent = customFace.get("textSizePercent").getAsInt();
+
+                bTextEnabled = customFace.get("enableText").getAsBoolean();
+                bTextStroke = customFace.get("strokeText").getAsBoolean();
+                bShowMilli = customFace.get("smoothAnim").getAsBoolean();
+                bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
+                b24HourTime = customFace.get("24hourtime").getAsBoolean();
+            }
+
+        }
+
+
     }
 
     public void saveSettings(Context context){
         settings = PreferenceManager.getDefaultSharedPreferences(context);
         editor = settings.edit();
 
-        editor.putInt("ringColor1", color1);
+        /*editor.putInt("ringColor1", color1);
         editor.putInt("ringColor2", color2);
         editor.putInt("ringColor3", color3);
         editor.putInt("bg", backgroundColor);
@@ -127,14 +224,72 @@ public class DrawableWatchFace {
         editor.putInt("ringSizePercent", ringSizePercent);
         editor.putInt("textSizePercent", textSizePercent);
 
-        editor.putString("watchFaceCombo", colorComboName);
-
         editor.putBoolean("enableText", bTextEnabled);
         editor.putBoolean("strokeText", bTextStroke);
-        editor.putBoolean("smoothAnim", bTextStroke);
+        editor.putBoolean("smoothAnim", bShowMilli);
         editor.putBoolean("grayAmbient", bGrayAmbient);
-        editor.putBoolean("24hourtime", b24HourTime);
+        editor.putBoolean("24hourtime", b24HourTime);*/
+
+        editor.putString("watchFaceCombo", colorComboName);
+
         editor.apply();
+
+        saveCustomRings(context);
+    }
+
+    public void convertSettingsToCustom(Context context) {
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
+
+        //Check for default settings
+        int tempRing1 = -1;
+        tempRing1 = settings.getInt("ringColor1", -1);
+        if (tempRing1 != -1){
+            colorComboName = "Custom 1";
+            //If we have any of these settings, remove them, we'll start making custom faces.
+            editor = settings.edit();
+            editor.clear();
+            editor.putString("watchFaceCombo", colorComboName);
+            editor.apply();
+
+            //Make a new custom ring out of the current settings
+            addUpdateCustomRing(context, 0);
+        }
+    }
+
+    public void addUpdateCustomRing(Context context, int customIndex){
+        JsonObject customRing = new JsonObject();
+        customRing.addProperty("ringColor1", color1);
+        customRing.addProperty("ringColor2", color2);
+        customRing.addProperty("ringColor3", color3);
+        customRing.addProperty("bg", backgroundColor);
+        customRing.addProperty("textColor", textColor);
+        customRing.addProperty("textStrokeColor", textStrokeColor);
+        customRing.addProperty("ringSizePercent", ringSizePercent);
+        customRing.addProperty("textSizePercent", textSizePercent);
+
+        customRing.addProperty("enableText", bTextEnabled);
+        customRing.addProperty("strokeText", bTextStroke);
+        customRing.addProperty("smoothAnim", bShowMilli);
+        customRing.addProperty("grayAmbient", bGrayAmbient);
+        customRing.addProperty("24hourtime", b24HourTime);
+
+        String customToString = gson.toJson(customRing);
+        // Make sure our array is big enough for this...
+        while(customRings.size() <= customIndex){
+            customRings.add(null);
+        }
+        customRings.set(customIndex, customToString);
+
+        saveCustomRings(context);
+    }
+
+    public void saveCustomRings(Context context){
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
+        editor = settings.edit();
+
+        Set<String> customRingsStringSet = new HashSet<String>(customRings);
+
+        editor.putStringSet("customRings", customRingsStringSet);
     }
 
     public void setAmbient(Boolean state){

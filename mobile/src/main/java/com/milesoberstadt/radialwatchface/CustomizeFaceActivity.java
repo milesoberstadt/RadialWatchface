@@ -2,27 +2,19 @@ package com.milesoberstadt.radialwatchface;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -34,12 +26,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataItem;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.util.ArrayList;
 
@@ -101,6 +92,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         //Get our saved prefs
         watchView.faceDrawer.loadSettings(this);
+        // Upgrade existing settings
+        watchView.faceDrawer.convertSettingsToCustom(this);
 
         watchLabel = (TextView) findViewById(R.id.watchFaceText);
         watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
@@ -157,13 +150,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 colorArraysToFetch.add(R.array.watch_gray_array);
                 colorArraysToFetch.add(R.array.watch_pastels_array);
 
-                ArrayList<String> colorNames = new ArrayList<>();
-                colorNames.add("RGB");
-                colorNames.add("CMY");
-                colorNames.add("Crayon");
-                colorNames.add("Grayscale");
-                colorNames.add("Pastels");
+                String[] colorNames = res.getStringArray(R.array.watch_faces);
 
+                //Create previews for built in options...
                 for(int i=0; i<colorArraysToFetch.size(); i++){
                     String[] colorArray = res.getStringArray(colorArraysToFetch.get(i));
 
@@ -175,12 +164,49 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     testRing.faceDrawer.color3 = Color.parseColor(colorArray[2]);
 
                     TextView titleText = (TextView) (((ViewGroup) testLayout).getChildAt(1));
-                    titleText.setText(colorNames.get(i));
+                    titleText.setText(colorNames[i]);
 
                     watchHolder.addView(testLayout);
                 }
 
+                JsonParser parser = new JsonParser();
 
+                //Generate previews for custom faces...
+                for (int i=0; i<watchView.faceDrawer.customRings.size(); i++){
+                    String currentCustom = watchView.faceDrawer.customRings.get(i);
+                    JsonObject customFace = (JsonObject) parser.parse(currentCustom);
+
+                    final View customRingLayout = LayoutInflater.from(watchHolder.getContext()).inflate(R.layout.watch_preview_custom, null, false);
+                    CanvasDrawnRingView customRing = (CanvasDrawnRingView) (((ViewGroup) customRingLayout).getChildAt(0));
+
+                    customRing.faceDrawer.color1 = customFace.get("ringColor1").getAsInt();
+                    customRing.faceDrawer.color2 = customFace.get("ringColor2").getAsInt();
+                    customRing.faceDrawer.color3 = customFace.get("ringColor3").getAsInt();
+
+                    customRing.faceDrawer.backgroundColor = customFace.get("bg").getAsInt();
+                    customRing.faceDrawer.textColor = customFace.get("textColor").getAsInt();
+                    customRing.faceDrawer.textStrokeColor = customFace.get("textStrokeColor").getAsInt();
+
+                    customRing.faceDrawer.ringSizePercent = customFace.get("ringSizePercent").getAsInt();
+                    customRing.faceDrawer.textSizePercent = customFace.get("textSizePercent").getAsInt();
+
+                    customRing.faceDrawer.bTextEnabled = customFace.get("enableText").getAsBoolean();
+                    customRing.faceDrawer.bTextStroke = customFace.get("strokeText").getAsBoolean();
+                    customRing.faceDrawer.bShowMilli = customFace.get("smoothAnim").getAsBoolean();
+                    customRing.faceDrawer.bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
+                    customRing.faceDrawer.b24HourTime = customFace.get("24hourtime").getAsBoolean();
+
+                    ImageView deleteButton = (ImageView) ((ViewGroup) customRingLayout).getChildAt(2);
+
+                    deleteButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            watchHolder.removeView(customRingLayout);
+                        }
+                    });
+
+                    watchHolder.addView(customRingLayout);
+                }
 
                 int watchCount = watchHolder.getChildCount();
 
@@ -193,6 +219,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     public void onClick(View v) {
                         // Make a new custom view and add it!
                         final View customRingLayout = LayoutInflater.from(watchHolder.getContext()).inflate(R.layout.watch_preview_custom, null, false);
+                        CanvasDrawnRingView customRing = (CanvasDrawnRingView) (((ViewGroup) customRingLayout).getChildAt(0));
+                        customRing.faceDrawer.colorComboName = "Custom "+(watchView.faceDrawer.customRings.size()+1);
+                        watchView.faceDrawer.addUpdateCustomRing(watchHolder.getContext(), watchView.faceDrawer.customRings.size());
+
                         ImageView deleteButton = (ImageView) ((ViewGroup) customRingLayout).getChildAt(2);
 
                         deleteButton.setOnClickListener(new View.OnClickListener() {
