@@ -49,6 +49,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
     private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
 
+    private ArrayList<View> customRingViews = new ArrayList<>();
 
     private final Context context = this;
 
@@ -93,7 +94,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         watchView.faceDrawer.convertSettingsToCustom(this);
 
         watchLabel = (TextView) findViewById(R.id.watchFaceText);
-        watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
         pickRing1 = (CircleView) findViewById(R.id.bg_color_ring1);
         pickRing2 = (CircleView) findViewById(R.id.bg_color_ring2);
@@ -131,6 +131,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 LayoutInflater inflater = getLayoutInflater();
                 builder.setView(inflater.inflate(R.layout.watch_face_picker, null));
                 builder.setTitle(R.string.set_face);
+
+                //Empty our custom rings, this gets populated every time this view opens.
+                customRingViews.clear();
 
                 alertDialog = builder.create();
                 alertDialog.show();
@@ -200,7 +203,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     customRing.faceDrawer.colorComboName = "Custom " + (i + 1);
 
                     // Update the name display
-                    TextView customText = (TextView) (((ViewGroup) customRingLayout).getChildAt(1));
+                    final TextView customText = (TextView) (((ViewGroup) customRingLayout).getChildAt(1));
                     customText.setText(customRing.faceDrawer.colorComboName);
 
                     ImageView deleteButton = (ImageView) ((ViewGroup) customRingLayout).getChildAt(2);
@@ -208,11 +211,13 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     deleteButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            watchHolder.removeView(customRingLayout);
+                            String deleteRingName = customText.getText().toString();
+                            deleteCustomWatch(deleteRingName, customRingLayout, watchHolder);
                         }
                     });
 
                     watchHolder.addView(customRingLayout);
+                    customRingViews.add(customRingLayout);
                 }
 
                 int watchCount = watchHolder.getChildCount();
@@ -232,22 +237,25 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                         customRing.faceDrawer.colorComboName = "Custom " + (watchView.faceDrawer.customRings.size() + 1);
 
-                        TextView customText = (TextView) (((ViewGroup) customRingLayout).getChildAt(1));
+                        final TextView customText = (TextView) (((ViewGroup) customRingLayout).getChildAt(1));
                         //Update the actual text view...
                         customText.setText(customRing.faceDrawer.colorComboName);
                         watchView.faceDrawer.addUpdateCustomRing(watchHolder.getContext(), watchView.faceDrawer.customRings.size());
+                        sendAllSettings();
 
                         ImageView deleteButton = (ImageView) ((ViewGroup) customRingLayout).getChildAt(2);
 
                         deleteButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                watchHolder.removeView(customRingLayout);
+                                String deleteRingName = customText.getText().toString();
+                                deleteCustomWatch(deleteRingName, customRingLayout, watchHolder);
                             }
                         });
 
                         customRingLayout.setOnClickListener(watchClicked);
                         watchHolder.addView(customRingLayout);
+                        customRingViews.add(customRingLayout);
                     }
                 });
 
@@ -260,7 +268,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 showColorPicker(1);
             }
         });
-        pickRing1.circleFillColor = watchView.faceDrawer.color1;
 
         pickRing2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -268,7 +275,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 showColorPicker(2);
             }
         });
-        pickRing2.circleFillColor = watchView.faceDrawer.color2;
 
         pickRing3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -276,10 +282,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 showColorPicker(3);
             }
         });
-        pickRing3.circleFillColor = watchView.faceDrawer.color3;
 
-        pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
-        pickTextColorButton.invalidate();
         pickTextColorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -287,8 +290,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
-        pickTextStrokeButton.invalidate();
         pickTextStrokeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -316,8 +317,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        pickBackgroundButton.circleFillColor = watchView.faceDrawer.backgroundColor;
-        pickBackgroundButton.invalidate();
         pickBackgroundButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -325,7 +324,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
         textSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -348,7 +346,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
         ringSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -370,22 +367,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
             }
         });
-
-        textSwitch.setChecked(watchView.faceDrawer.bTextEnabled);
-        militarySwitch.setChecked(watchView.faceDrawer.b24HourTime);
-        strokeSwitch.setChecked(watchView.faceDrawer.bTextStroke);
-        smoothSwitch.setChecked(watchView.faceDrawer.bShowMilli);
-        graySwitch.setChecked(watchView.faceDrawer.bGrayAmbient);
-
-        if (textSwitch.isChecked()){
-            textSwitch.setEnabled(true);
-            militarySwitch.setEnabled(true);
-            strokeSwitch.setEnabled(true);
-        }
-        else{
-            militarySwitch.setEnabled(false);
-            strokeSwitch.setEnabled(false);
-        }
 
         textSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -454,6 +435,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 sendAllSettings();
             }
         });
+
+        updateUIFromSettings();
     }
 
     @Override
@@ -579,7 +562,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         builder.setMessage(messageText)
                 .setCancelable(false)
                 .setPositiveButton(okText, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) { }
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
                 });
         AlertDialog alert = builder.create();
         alert.show();
@@ -605,32 +589,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 return;
             }
 
-            // TODO: Find somewhere in settings to have settings for defaults for these in templates
             copySettingsFromOneFaceToAnother(clickedView.faceDrawer, watchView.faceDrawer);
 
-            pickBackgroundButton.circleFillColor = clickedView.faceDrawer.backgroundColor;
-            pickBackgroundButton.invalidate();
-
-            pickRing1.circleFillColor = watchView.faceDrawer.color1;
-            pickRing1.invalidate();
-            pickRing2.circleFillColor = watchView.faceDrawer.color2;
-            pickRing2.invalidate();
-            pickRing3.circleFillColor = watchView.faceDrawer.color3;
-            pickRing3.invalidate();
-
-            pickTextColorButton.circleFillColor = clickedView.faceDrawer.textColor;
-            pickTextColorButton.invalidate();
-            pickTextStrokeButton.circleFillColor = clickedView.faceDrawer.textStrokeColor;
-            pickTextStrokeButton.invalidate();
-
-            textSwitch.setChecked(watchView.faceDrawer.bTextEnabled);
-            strokeSwitch.setChecked(watchView.faceDrawer.bTextStroke);
-            militarySwitch.setChecked(watchView.faceDrawer.b24HourTime);
-            smoothSwitch.setChecked(watchView.faceDrawer.bShowMilli);
-            graySwitch.setChecked(watchView.faceDrawer.bGrayAmbient);
-
-            textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
-            ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
+            updateUIFromSettings();
 
             sendAllSettings();
 
@@ -639,6 +600,82 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             alertDialog.dismiss();
         }
     };
+
+    private void deleteCustomWatch(String customRingName, View viewToDelete, LinearLayout layoutToDeleteFrom){
+        // Before we delete this, we need to remove it from our data...
+        int deleteIndex = Integer.parseInt(customRingName.split("Custom ")[1]);
+        watchView.faceDrawer.customRings.remove(deleteIndex-1);
+
+        //Update the display of all the custom rings to show correct numbers...
+        customRingViews.remove(deleteIndex-1);
+        for(int i=0; i<customRingViews.size(); i++){
+            TextView currentRingText =  (TextView) (((ViewGroup) customRingViews.get(i)).getChildAt(1));
+            currentRingText.setText("Custom "+(i+1));
+        }
+
+        sendAllSettings();
+
+        //If we aren't using a custom face...do nothing lol
+        if (watchView.faceDrawer.colorComboName.indexOf("Custom ") == -1){
+
+        }
+        //If we just deleted the last custom ring, select RGB by default.
+        else if (watchView.faceDrawer.customRings.isEmpty()) {
+            watchView.faceDrawer.colorComboName = "RGB";
+            watchView.faceDrawer.resetDefaultStyle();
+            updateUIFromSettings();
+        }
+        else{
+            // Since we just deleted one, we need to temporarily select something else
+            // Otherwise our user could hit back and have an invalid face selected...
+            // Select the next ring, or the last one, whatever's safest.
+            int tempSelection = Math.min(deleteIndex, watchView.faceDrawer.customRings.size()-1);
+            watchView.faceDrawer.colorComboName = "Custom " + (tempSelection + 1);
+
+            watchView.faceDrawer.applySettingsFromCustomRing(tempSelection);
+            updateUIFromSettings();
+        }
+
+        layoutToDeleteFrom.removeView(viewToDelete);
+    }
+
+    public void updateUIFromSettings(){
+        watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
+
+        pickBackgroundButton.circleFillColor = watchView.faceDrawer.backgroundColor;
+        pickBackgroundButton.invalidate();
+
+        pickRing1.circleFillColor = watchView.faceDrawer.color1;
+        pickRing1.invalidate();
+        pickRing2.circleFillColor = watchView.faceDrawer.color2;
+        pickRing2.invalidate();
+        pickRing3.circleFillColor = watchView.faceDrawer.color3;
+        pickRing3.invalidate();
+
+        pickTextColorButton.circleFillColor = watchView.faceDrawer.textColor;
+        pickTextColorButton.invalidate();
+        pickTextStrokeButton.circleFillColor = watchView.faceDrawer.textStrokeColor;
+        pickTextStrokeButton.invalidate();
+
+        textSwitch.setChecked(watchView.faceDrawer.bTextEnabled);
+        strokeSwitch.setChecked(watchView.faceDrawer.bTextStroke);
+        militarySwitch.setChecked(watchView.faceDrawer.b24HourTime);
+        smoothSwitch.setChecked(watchView.faceDrawer.bShowMilli);
+        graySwitch.setChecked(watchView.faceDrawer.bGrayAmbient);
+
+        textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
+        ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
+
+        if (textSwitch.isChecked()){
+            textSwitch.setEnabled(true);
+            militarySwitch.setEnabled(true);
+            strokeSwitch.setEnabled(true);
+        }
+        else{
+            militarySwitch.setEnabled(false);
+            strokeSwitch.setEnabled(false);
+        }
+    }
 
     private void showBGColorPicker(){
         int initialColor = watchView.faceDrawer.backgroundColor;
@@ -749,7 +786,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                     sendAllSettings();
 
-                    watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
+                    watchLabel.setText("Current Face: " + watchView.faceDrawer.colorComboName);
             }
         });
 
