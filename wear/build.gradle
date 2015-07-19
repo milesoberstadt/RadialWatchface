@@ -9,8 +9,8 @@ android {
         applicationId "com.milesoberstadt.radialwatchface"
         minSdkVersion 21
         targetSdkVersion 22
-        versionCode 9
-        versionName "1.3.3"
+        versionCode 10
+        versionName "1.4"
     }
     buildTypes {
         release {

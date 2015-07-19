@@ -8,8 +8,8 @@ android {
         applicationId "com.milesoberstadt.radialwatchface"
         minSdkVersion 18
         targetSdkVersion 22
-        versionCode 9
-        versionName "1.3.3"
+        versionCode 10
+        versionName "1.4"
     }
     buildTypes {
         release {
@@ -24,7 +24,7 @@ dependencies {
     wearApp project(':wear')
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.google.android.gms:play-services:7.3.0'
-    compile 'com.android.support:support-v13:21.0.0'
+    compile 'com.android.support:support-v13:22.0.0'
     compile project(':radialwatchdisplay')
     compile 'com.google.code.gson:gson:2.3.1'
 }
