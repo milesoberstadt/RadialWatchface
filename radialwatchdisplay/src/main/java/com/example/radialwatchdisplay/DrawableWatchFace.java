@@ -39,6 +39,9 @@ public class DrawableWatchFace {
     public Boolean bTextStroke = false;
     public Boolean bShowMilli = false; //This decides if we display smooth animations for milliseconds
     public Boolean b24HourTime = false;
+    public Boolean bReverseRingOrder = false;
+    public Boolean bShowSeconds = true;
+
     public int color1 = 0xFFe51c23;
     public int color2 = 0xFF8bc34a;
     public int color3 = 0xFF03a9f4;
@@ -239,6 +242,8 @@ public class DrawableWatchFace {
         bShowMilli = customFace.get("smoothAnim").getAsBoolean();
         bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
         b24HourTime = customFace.get("24hourtime").getAsBoolean();
+        bReverseRingOrder = customFace.get("reverseRingOrder").getAsBoolean();
+        bShowSeconds = customFace.get("showSeconds").getAsBoolean();
     }
 
     public void convertSettingsToCustom(Context context) {
@@ -276,6 +281,8 @@ public class DrawableWatchFace {
         customRing.addProperty("smoothAnim", bShowMilli);
         customRing.addProperty("grayAmbient", bGrayAmbient);
         customRing.addProperty("24hourtime", b24HourTime);
+        customRing.addProperty("reverseRingOrder", bReverseRingOrder);
+        customRing.addProperty("showSeconds", bShowSeconds);
 
         String customToString = gson.toJson(customRing);
         // Make sure our array is big enough for this...
@@ -340,9 +347,12 @@ public class DrawableWatchFace {
         // Draw our background / wipe the screen
         canvas.drawRect(bounds, mBackgroundPaint);
 
-        RectF hoursOval = new RectF();
-        RectF minutesOval = new RectF();
-        RectF secondsOval = new RectF();
+        RectF outerOval = new RectF();
+        RectF middleOval = new RectF();
+        RectF innerOval = new RectF();
+
+        //Use these for referring to which rings should be used to paint what, since those can be changed
+        RectF hoursOval, minutesOval, secondsOval;
 
         //Define our colored radian zones
         //Rings get drawn around these rects where the center of the ring is the outside edge of the rect
@@ -356,13 +366,26 @@ public class DrawableWatchFace {
         float minuteStrokeOffset = (ringPadding*2.f) + (strokeWidth * (float)1.5);
         float secondStrokeOffset = (ringPadding*3.f) + (strokeWidth * (float)2.5);
 
-        //float hourStrokeOffset = maximumRingSize/2;
-        //float minuteStrokeOffset = maximumRingSize * (float)1.5;
-        //float secondStrokeOffset = maximumRingSize * (float)2.5;
+        outerOval.set(hourStrokeOffset, hourStrokeOffset, myWidth - (hourStrokeOffset), myWidth - (hourStrokeOffset));
+        middleOval.set(minuteStrokeOffset, minuteStrokeOffset, myWidth - (minuteStrokeOffset), myWidth - (minuteStrokeOffset));
+        innerOval.set(secondStrokeOffset, secondStrokeOffset, myWidth - (secondStrokeOffset), myWidth - (secondStrokeOffset));
 
-        hoursOval.set(hourStrokeOffset, hourStrokeOffset, myWidth - (hourStrokeOffset), myWidth - (hourStrokeOffset));
-        minutesOval.set(minuteStrokeOffset, minuteStrokeOffset, myWidth - (minuteStrokeOffset), myWidth - (minuteStrokeOffset));
-        secondsOval.set(secondStrokeOffset, secondStrokeOffset, myWidth - (secondStrokeOffset), myWidth - (secondStrokeOffset));
+        //Figure out which ovals to use where...
+        if (!bReverseRingOrder){
+            hoursOval = outerOval;
+            minutesOval = middleOval;
+            secondsOval = innerOval;
+        }
+        else if (bReverseRingOrder && bShowSeconds){
+            hoursOval = innerOval;
+            minutesOval = middleOval;
+            secondsOval = outerOval;
+        }
+        else{ //if (bReverseRingOrder && !bShowSeconds){ (Only condition that SHOULD match...)
+            hoursOval = middleOval;
+            minutesOval = outerOval;
+            secondsOval = innerOval;
+        }
 
         //Define our colored radian lengths
         Path secondsPath = new Path();
@@ -401,15 +424,12 @@ public class DrawableWatchFace {
         Path hoursLabelPath = new Path();
         hoursLabelPath.addArc(hoursOval, -90, 90);
 
-        /*Paint whitePaint = new Paint();
-        whitePaint.setColor(0xFFFFFFFF);
-        canvas.drawRect(hoursOval, whitePaint);*/
         //If we don't need grayscale in ambient mode, do this the normal way...
         if (!bGrayAmbient || this.mActive) {
             //Draw our colored radians after setting the color...
             mArcPaint.setColor(color3); //0xFF109618
             //Only draw our seconds path when we're active...
-            if (this.mActive)
+            if (this.mActive && this.bShowSeconds)
                 canvas.drawPath(secondsPath, mArcPaint);
             mArcPaint.setColor(color2); //0xFF3366cc
             canvas.drawPath(minutesPath, mArcPaint);
@@ -479,7 +499,7 @@ public class DrawableWatchFace {
                     mFontStrokePaint.setColor(textStrokeColor);
                 }
 
-                if (this.mActive)
+                if (this.mActive && this.bShowSeconds)
                     canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, vOffset, mFontStrokePaint);
                 canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, vOffset, mFontStrokePaint);
                 canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, vOffset, mFontStrokePaint);
@@ -488,7 +508,7 @@ public class DrawableWatchFace {
             if (!mActive && bGrayAmbient)
                 mFontPaint.setColor(0xFF000000);
 
-            if (this.mActive)
+            if (this.mActive && this.bShowSeconds)
                 canvas.drawTextOnPath(displaySeconds, secondsLabelPath, secondsXOffset, vOffset, mFontPaint);
             canvas.drawTextOnPath(displayMinutes, minutesLabelPath, minutesXOffset, vOffset, mFontPaint);
             canvas.drawTextOnPath(displayHours, hoursLabelPath, hoursXOffset, vOffset, mFontPaint);

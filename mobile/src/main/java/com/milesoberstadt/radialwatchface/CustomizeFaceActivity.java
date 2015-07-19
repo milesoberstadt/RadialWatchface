@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -47,7 +48,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             pickBackgroundButton, pickTextColorButton, pickTextStrokeButton;
     private SeekBar textSizeSeek, ringSizeSeek;
 
-    private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
+    private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch,
+            reverseOrderSwitch, showSecondsSwitch;
 
     private ArrayList<View> customRingViews = new ArrayList<>();
 
@@ -112,6 +114,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         strokeSwitch = (Switch) findViewById(R.id.stroke_switch);
         smoothSwitch = (Switch) findViewById(R.id.smooth_switch);
         graySwitch = (Switch) findViewById(R.id.gray_switch);
+        reverseOrderSwitch = (Switch) findViewById(R.id.reverse_ring_order_switch);
+        showSecondsSwitch = (Switch) findViewById(R.id.show_seconds_switch);
 
         graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
 
@@ -370,11 +374,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        textSwitch.setOnClickListener(new View.OnClickListener() {
+        textSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-
-                watchView.faceDrawer.bTextEnabled = textSwitch.isChecked();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                watchView.faceDrawer.bTextEnabled = isChecked;
 
                 saveCustomWatchFace();
 
@@ -382,9 +385,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        militarySwitch.setOnClickListener(new View.OnClickListener() {
+        militarySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 watchView.faceDrawer.b24HourTime = militarySwitch.isChecked();
 
                 saveCustomWatchFace();
@@ -393,9 +396,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        strokeSwitch.setOnClickListener(new View.OnClickListener() {
+        strokeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 watchView.faceDrawer.bTextStroke = strokeSwitch.isChecked();
 
                 saveCustomWatchFace();
@@ -404,9 +407,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        smoothSwitch.setOnClickListener(new View.OnClickListener() {
+        smoothSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 watchView.faceDrawer.bShowMilli = smoothSwitch.isChecked();
 
                 saveCustomWatchFace();
@@ -415,11 +418,33 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        graySwitch.setOnClickListener(new View.OnClickListener() {
+        graySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 //Nothing to display (phone can't be ambient) just send changes...
                 saveCustomWatchFace();
+                sendAllSettings();
+            }
+        });
+
+        reverseOrderSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                watchView.faceDrawer.bReverseRingOrder = reverseOrderSwitch.isChecked();
+
+                saveCustomWatchFace();
+
+                sendAllSettings();
+            }
+        });
+
+        showSecondsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                watchView.faceDrawer.bShowSeconds = showSecondsSwitch.isChecked();
+
+                saveCustomWatchFace();
+
                 sendAllSettings();
             }
         });
@@ -495,13 +520,24 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         String textCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textColor));
         String textSCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textStrokeColor));
 
-        PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/radialSettings");
         dataMap.getDataMap().putString("color1", col1);
         dataMap.getDataMap().putString("color2", col2);
         dataMap.getDataMap().putString("color3", col3);
         dataMap.getDataMap().putString("bg", bg);
         dataMap.getDataMap().putString("textColor", textCol);
         dataMap.getDataMap().putString("textStrokeColor", textSCol);
+
+        dataMap.getDataMap().putBoolean("enableText", watchView.faceDrawer.bTextEnabled);
+        dataMap.getDataMap().putBoolean("24hourtime", watchView.faceDrawer.b24HourTime);
+        dataMap.getDataMap().putBoolean("strokeText", watchView.faceDrawer.bTextStroke);
+        dataMap.getDataMap().putBoolean("smoothAnim", watchView.faceDrawer.bShowMilli);
+        dataMap.getDataMap().putBoolean("grayAmbient", watchView.faceDrawer.bGrayAmbient);
+        dataMap.getDataMap().putBoolean("reverseRingOrder", watchView.faceDrawer.bReverseRingOrder);
+        dataMap.getDataMap().putBoolean("showSeconds", watchView.faceDrawer.bShowSeconds);
+        dataMap.getDataMap().putInt("ringSizePercent", watchView.faceDrawer.ringSizePercent);
+        dataMap.getDataMap().putInt("textSizePercent", watchView.faceDrawer.textSizePercent);
+
         PutDataRequest request = dataMap.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
                 .putDataItem(mGoogleApiClient, request);
@@ -515,31 +551,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     Log.d(TAG, "Wow, so fail: " + dataItemResult.getStatus().toString());
             }
         });
-
-        PutDataMapRequest dataMap2 = PutDataMapRequest.create("/text");
-        dataMap2.getDataMap().putBoolean("enableText", watchView.faceDrawer.bTextEnabled);
-        dataMap2.getDataMap().putBoolean("24hourtime", watchView.faceDrawer.b24HourTime);
-        dataMap2.getDataMap().putBoolean("strokeText", watchView.faceDrawer.bTextStroke);
-        dataMap2.getDataMap().putBoolean("smoothAnim", watchView.faceDrawer.bShowMilli);
-        dataMap2.getDataMap().putBoolean("grayAmbient", watchView.faceDrawer.bGrayAmbient);
-        dataMap2.getDataMap().putInt("ringSizePercent", watchView.faceDrawer.ringSizePercent);
-        dataMap2.getDataMap().putInt("textSizePercent", watchView.faceDrawer.textSizePercent);
-
-        PutDataRequest request2 = dataMap2.asPutDataRequest();
-        PendingResult<DataApi.DataItemResult> pendingResult2 = Wearable.DataApi
-                .putDataItem(mGoogleApiClient, request2);
-
-        pendingResult2.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-            @Override
-            public void onResult(DataApi.DataItemResult dataItemResult) {
-                if (dataItemResult.getStatus().isSuccess()) {
-                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
-                }
-                else
-                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
-            }
-        });
-
     }
 
     // TODO: Make this actually happen again
@@ -650,6 +661,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         militarySwitch.setChecked(watchView.faceDrawer.b24HourTime);
         smoothSwitch.setChecked(watchView.faceDrawer.bShowMilli);
         graySwitch.setChecked(watchView.faceDrawer.bGrayAmbient);
+        reverseOrderSwitch.setChecked(watchView.faceDrawer.bReverseRingOrder);
+        showSecondsSwitch.setChecked(watchView.faceDrawer.bShowSeconds);
 
         textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
         ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);

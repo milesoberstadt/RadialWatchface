@@ -42,4 +42,7 @@
 
     <string name="ring_size">Ring Size</string>
 
+    <string name="reverse_ring_order">Reverse Ring Order</string>
+    <string name="show_seconds">Show Seconds Ring</string>
+
 </resources>

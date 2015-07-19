@@ -83,12 +83,6 @@
             android:padding="10dp"
             android:orientation="vertical">
 
-            <!--<Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_custom"
-                android:id="@+id/changeCustomFace"/>-->
-
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -302,6 +296,18 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/ring_size_seek" />
+
+            <Switch
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reverse_ring_order"
+                android:id="@+id/reverse_ring_order_switch"/>
+
+            <Switch
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/show_seconds"
+                android:id="@+id/show_seconds_switch"/>
 
 
         </LinearLayout>

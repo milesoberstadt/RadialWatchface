@@ -231,33 +231,31 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                         faceDrawer.textColor = Color.parseColor(dm.getString("textColor"));
                     if (dm.containsKey("textStrokeColor"))
                         faceDrawer.textStrokeColor = Color.parseColor(dm.getString("textStrokeColor"));
-
                     if (dm.containsKey("enableText")){
-                        faceDrawer.bTextEnabled = dm.getBoolean("enableText");
-                    }
-                    // TODO: Remove this, it's in for legacy theme support...
-                    if (dm.containsKey("invertText")){
-                        faceDrawer.textColor = 0xFF000000;
-                        faceDrawer.textStrokeColor = 0xFFFFFFFF;
+                        faceDrawer.bTextEnabled = dm.getBoolean("enableText", faceDrawer.bTextEnabled);
                     }
                     if (dm.containsKey("strokeText")){
-                        faceDrawer.bTextStroke = dm.getBoolean("strokeText");
+                        faceDrawer.bTextStroke = dm.getBoolean("strokeText", faceDrawer.bTextStroke);
                     }
                     if (dm.containsKey("smoothAnim")){
-                        faceDrawer.bShowMilli = dm.getBoolean("smoothAnim");
+                        faceDrawer.bShowMilli = dm.getBoolean("smoothAnim", faceDrawer.bShowMilli);
                     }
                     if (dm.containsKey("grayAmbient")){
-                        faceDrawer.bGrayAmbient = dm.getBoolean("grayAmbient");
+                        faceDrawer.bGrayAmbient = dm.getBoolean("grayAmbient", faceDrawer.bGrayAmbient);
                     }
                     if (dm.containsKey("24hourtime")){
-                        faceDrawer.b24HourTime = dm.getBoolean("24hourtime");
+                        faceDrawer.b24HourTime = dm.getBoolean("24hourtime", faceDrawer.b24HourTime);
                     }
                     if (dm.containsKey("ringSizePercent")){
-                        faceDrawer.ringSizePercent = dm.getInt("ringSizePercent");
+                        faceDrawer.ringSizePercent = dm.getInt("ringSizePercent", faceDrawer.ringSizePercent);
                     }
                     if (dm.containsKey("textSizePercent")){
-                        faceDrawer.textSizePercent = dm.getInt("textSizePercent");
+                        faceDrawer.textSizePercent = dm.getInt("textSizePercent", faceDrawer.textSizePercent);
                     }
+                    if (dm.containsKey("reverseRingOrder"))
+                        faceDrawer.bReverseRingOrder = dm.getBoolean("reverseRingOrder", faceDrawer.bReverseRingOrder);
+                    if (dm.containsKey("showSeconds"))
+                        faceDrawer.bShowSeconds = dm.getBoolean("showSeconds", faceDrawer.bShowSeconds);
                 }
             }
 
