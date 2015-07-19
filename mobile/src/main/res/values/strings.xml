@@ -9,8 +9,8 @@
     <string name="preview">Preview</string>
 
     <string name="watch_color_header">Watch Color Scheme</string>
-    <string name="set_face">Change Face...</string>
-    <string name="set_custom">Set Custom Scheme...</string>
+    <string name="set_face">Change Preset</string>
+    <string name="set_custom">Custom Scheme</string>
     <string name="set_bg">Background Color</string>
 
     <string name="title_no_device_connected">No wearable device is currently connected.</string>
@@ -18,13 +18,13 @@
 
     <string name="color_options">Set Colors</string>
 
-    <string name="change_ring_1">Set Outer Ring Color...</string>
-    <string name="change_ring_2">Set Middle Ring Color...</string>
-    <string name="change_ring_3">Set Inner Ring Color...</string>
+    <string name="change_ring_1">Outer Ring Color</string>
+    <string name="change_ring_2">Middle Ring Color</string>
+    <string name="change_ring_3">Inner Ring Color</string>
 
     <string name="text_options">Text Options</string>
-    <string name="set_text_color">Set Text Color...</string>
-    <string name="set_text_stroke_color">Set Text Stroke Color...</string>
+    <string name="set_text_color">Text Color</string>
+    <string name="set_text_stroke_color">Text Stroke Color</string>
     <string name="text_color">Text Color</string>
     <string name="text_stroke_color">Text Stroke Color</string>
     <string name="swap_colors">Swap</string>
@@ -32,7 +32,7 @@
     <string name="military_time">24 Hour Time</string>
     <string name="invert_text">Invert Text Colors</string>
     <string name="text_stroke">Show Text Stroke</string>
-    <string name="text_size">Set Text Size</string>
+    <string name="text_size">Text Size</string>
 
     <string name="display_options">Display Options</string>
     <string name="sm_sec">Smooth Seconds Animation</string>
@@ -40,6 +40,6 @@
 
     <string name="add_new">Add New Watchface</string>
 
-    <string name="ring_size">Set Ring Size</string>
+    <string name="ring_size">Ring Size</string>
 
 </resources>

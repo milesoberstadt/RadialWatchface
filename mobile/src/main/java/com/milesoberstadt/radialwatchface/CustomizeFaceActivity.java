@@ -331,6 +331,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 watchView.faceDrawer.textSizePercent = progress;
 
                 saveCustomWatchFace();
+                updateUIFromSettings();
 
                 sendAllSettings();
             }
@@ -353,6 +354,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 watchView.faceDrawer.ringSizePercent = progress;
 
                 saveCustomWatchFace();
+                updateUIFromSettings();
 
                 sendAllSettings();
             }
@@ -373,20 +375,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onClick(View v) {
 
                 watchView.faceDrawer.bTextEnabled = textSwitch.isChecked();
-
-                if (textSwitch.isChecked())
-                {
-                    textSwitch.setEnabled(true);
-                    militarySwitch.setEnabled(true);
-                    strokeSwitch.setEnabled(true);
-                }
-
-                else{
-                    militarySwitch.setEnabled(false);
-                    militarySwitch.setChecked(false);
-                    strokeSwitch.setEnabled(false);
-                    strokeSwitch.setChecked(false);
-                }
 
                 saveCustomWatchFace();
 
@@ -686,11 +674,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "BG color selected: "+String.valueOf(color));
                 watchView.faceDrawer.backgroundColor = color;
-                pickBackgroundButton.circleFillColor = color;
-                pickBackgroundButton.invalidate();
-                watchView.faceDrawer.saveSettings(getApplicationContext());
 
                 saveCustomWatchFace();
+                updateUIFromSettings();
+
                 sendAllSettings();
             }
         });
@@ -708,11 +695,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "Text color selected: "+String.valueOf(color));
                 watchView.faceDrawer.textColor = color;
-                pickTextColorButton.circleFillColor = color;
-                pickTextColorButton.invalidate();
-                watchView.faceDrawer.saveSettings(getApplicationContext());
 
                 saveCustomWatchFace();
+                updateUIFromSettings();
+
                 sendAllSettings();
             }
         });
@@ -730,11 +716,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             public void onColorSelected(int color) {
                 Log.d(TAG, "Text stroke selected: "+String.valueOf(color));
                 watchView.faceDrawer.textStrokeColor = color;
-                pickTextStrokeButton.circleFillColor = color;
-                pickTextStrokeButton.invalidate();
-                watchView.faceDrawer.saveSettings(getApplicationContext());
 
                 saveCustomWatchFace();
+                updateUIFromSettings();
+
                 sendAllSettings();
             }
         });
