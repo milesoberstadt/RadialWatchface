@@ -11,3 +11,7 @@
 .idea/vcs.xml
 .idea/gradle.xml
 manifest-merger-release-report.txt
+.idea/gradle.xml
+mobile/mobile.iml
+radialwatchdisplay/radialwatchdisplay.iml
+*.iml
