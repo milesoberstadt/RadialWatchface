@@ -46,7 +46,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private Button pickFaceButton, swapTextStrokeButton;
     private CircleView pickRing1, pickRing2, pickRing3,
             pickBackgroundButton, pickTextColorButton, pickTextStrokeButton;
-    private SeekBar textSizeSeek, ringSizeSeek;
+    private SeekBar textSizeSeek, textAngleSeek, ringSizeSeek;
 
     private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch,
             reverseOrderSwitch, showSecondsSwitch;
@@ -106,6 +106,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         pickBackgroundButton = (CircleView) findViewById(R.id.bg_color_preview);
 
         textSizeSeek = (SeekBar) findViewById(R.id.text_size_seek);
+        textAngleSeek = (SeekBar) findViewById(R.id.text_angle_seek);
         ringSizeSeek = (SeekBar) findViewById(R.id.ring_size_seek);
 
         //Define switches
@@ -336,6 +337,32 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
                 saveCustomWatchFace();
                 updateUIFromSettings();
+
+                sendAllSettings();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        textAngleSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float calcDegrees = (progress/100.f) * 360;
+                //People think of a circle's origin starting at the top most, middle most point. Let's make that happen.
+                calcDegrees += 90;
+                calcDegrees = calcDegrees % 360;
+
+                watchView.faceDrawer.textAngle = calcDegrees;
+
+                saveCustomWatchFace();
 
                 sendAllSettings();
             }
@@ -666,6 +693,12 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
         ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
+
+        //Convert our text angle back to a percent
+        float tempAngle = watchView.faceDrawer.textAngle - 90;
+        tempAngle = tempAngle % 360;
+        int calcPercent = (int) Math.floor((tempAngle/360.f) * 100.f);
+        textAngleSeek.setProgress(calcPercent);
 
         if (textSwitch.isChecked()){
             textSwitch.setEnabled(true);

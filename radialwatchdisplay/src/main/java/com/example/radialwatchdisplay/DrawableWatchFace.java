@@ -75,7 +75,7 @@ public class DrawableWatchFace {
     private float defaultPadding; // Originally, on a 320x320 watch, it was 15 px. I want to maintain that ratio...
 
     int myWidth = -1;
-    float textAngle = 45;
+    public float textAngle = 45;
     float textRadians;
 
     protected SharedPreferences settings;

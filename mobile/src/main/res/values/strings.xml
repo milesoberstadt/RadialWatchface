@@ -45,4 +45,6 @@
     <string name="reverse_ring_order">Reverse Ring Order</string>
     <string name="show_seconds">Show Seconds Ring</string>
 
+    <string name="text_angle">Text Angle</string>
+
 </resources>
