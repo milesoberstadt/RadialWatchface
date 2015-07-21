@@ -418,11 +418,11 @@ public class DrawableWatchFace {
 
         //These are our text radian paths, nice and long so our text will display correctly
         Path secondsLabelPath = new Path();
-        secondsLabelPath.addArc(secondsOval, -90, 180);
+        secondsLabelPath.addArc(secondsOval, textAngle, 180);
         Path minutesLabelPath = new Path();
-        minutesLabelPath.addArc(minutesOval, -90, 90);
+        minutesLabelPath.addArc(minutesOval, textAngle, 90);
         Path hoursLabelPath = new Path();
-        hoursLabelPath.addArc(hoursOval, -90, 90);
+        hoursLabelPath.addArc(hoursOval, textAngle, 90);
 
         //If we don't need grayscale in ambient mode, do this the normal way...
         if (!bGrayAmbient || this.mActive) {
@@ -469,12 +469,12 @@ public class DrawableWatchFace {
         }
 
         float textSize = maximumTextSize * (textSizePercent/100.f);
-        textRadians = (textAngle) * (float)(Math.PI/180);
+        textRadians = 0;//(textAngle) * (float)(Math.PI/180);
 
         //The math for horizontal offset is r * cos(t) where r is radius and t is radians
-        float secondsXOffset = (float) ((secondsOval.width()/2)*Math.cos(textRadians));
-        float minutesXOffset = (float) ((minutesOval.width()/2)*Math.cos(textRadians));
-        float hoursXOffset = (float) ((hoursOval.width()/2)*Math.cos(textRadians));
+        float secondsXOffset = 0;//(float) ((secondsOval.width()/2)*Math.cos(textRadians));
+        float minutesXOffset = 0;//(float) ((minutesOval.width()/2)*Math.cos(textRadians));
+        float hoursXOffset = 0;//(float) ((hoursOval.width()/2)*Math.cos(textRadians));
 
         mFontPaint.setColor(textColor);
 
