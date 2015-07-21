@@ -356,8 +356,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 float calcDegrees = (progress/100.f) * 360;
-                //People think of a circle's origin starting at the top most, middle most point. Let's make that happen.
-                calcDegrees -= 90;
                 calcDegrees = calcDegrees % 360;
 
                 watchView.faceDrawer.textAngle = calcDegrees;
@@ -695,9 +693,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
 
         //Convert our text angle back to a percent
-        float tempAngle = watchView.faceDrawer.textAngle + 90;
-        tempAngle = tempAngle % 360;
-        int calcPercent = (int) Math.floor((tempAngle/360.f) * 100.f);
+        int calcPercent = (int) Math.floor((watchView.faceDrawer.textAngle/360.f) * 100.f);
         textAngleSeek.setProgress(calcPercent);
 
         if (textSwitch.isChecked()){
