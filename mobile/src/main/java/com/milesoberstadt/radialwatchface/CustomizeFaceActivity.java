@@ -81,7 +81,12 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActionBar().hide();
+        try {
+            getActionBar().hide();
+        }
+        catch (NullPointerException e){
+            Log.d(TAG, "Couldn't hide actionBar because: "+e.getMessage());
+        }
         setContentView(R.layout.activity_customize_face);
 
         Log.d(TAG, "onCreate");
@@ -188,22 +193,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     final View customRingLayout = LayoutInflater.from(watchHolder.getContext()).inflate(R.layout.watch_preview_custom, null, false);
                     CanvasDrawnRingView customRing = (CanvasDrawnRingView) (((ViewGroup) customRingLayout).getChildAt(0));
 
-                    customRing.faceDrawer.color1 = customFace.get("ringColor1").getAsInt();
-                    customRing.faceDrawer.color2 = customFace.get("ringColor2").getAsInt();
-                    customRing.faceDrawer.color3 = customFace.get("ringColor3").getAsInt();
-
-                    customRing.faceDrawer.backgroundColor = customFace.get("bg").getAsInt();
-                    customRing.faceDrawer.textColor = customFace.get("textColor").getAsInt();
-                    customRing.faceDrawer.textStrokeColor = customFace.get("textStrokeColor").getAsInt();
-
-                    customRing.faceDrawer.ringSizePercent = customFace.get("ringSizePercent").getAsInt();
-                    customRing.faceDrawer.textSizePercent = customFace.get("textSizePercent").getAsInt();
-
-                    customRing.faceDrawer.bTextEnabled = customFace.get("enableText").getAsBoolean();
-                    customRing.faceDrawer.bTextStroke = customFace.get("strokeText").getAsBoolean();
-                    customRing.faceDrawer.bShowMilli = customFace.get("smoothAnim").getAsBoolean();
-                    customRing.faceDrawer.bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
-                    customRing.faceDrawer.b24HourTime = customFace.get("24hourtime").getAsBoolean();
+                    customRing.faceDrawer.applySettingsFromCustomRing(customFace);
 
                     customRing.faceDrawer.colorComboName = "Custom " + (i + 1);
 
@@ -597,9 +587,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private View.OnClickListener watchClicked = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            LinearLayout linearView = null;
+            LinearLayout linearView;
             CanvasDrawnRingView clickedView = null;
-            String displayName = "";
 
             if (view instanceof LinearLayout)
             {
@@ -607,7 +596,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 if (linearView.getChildAt(0) instanceof CanvasDrawnRingView) {
                     clickedView = (CanvasDrawnRingView) linearView.getChildAt(0);
                 }
-                displayName = ((TextView)linearView.getChildAt(1)).getText().toString();
             }
 
             if (clickedView == null) {
@@ -640,9 +628,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         sendAllSettings();
 
-        //If we aren't using a custom face...do nothing lol
-        if (watchView.faceDrawer.colorComboName.indexOf("Custom ") == -1){
-
+        if (!watchView.faceDrawer.colorComboName.contains("Custom ")){
+            //If we aren't using a custom face...do nothing lol
         }
         //If we just deleted the last custom ring, select RGB by default.
         else if (watchView.faceDrawer.customRings.isEmpty()) {
@@ -654,10 +641,16 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             // Since we just deleted one, we need to temporarily select something else
             // Otherwise our user could hit back and have an invalid face selected...
             // Select the next ring, or the last one, whatever's safest.
-            int tempSelection = Math.min(deleteIndex, watchView.faceDrawer.customRings.size()-1);
-            watchView.faceDrawer.colorComboName = "Custom " + (tempSelection + 1);
+            int customIndex = Math.min(deleteIndex, watchView.faceDrawer.customRings.size()-1);
+            watchView.faceDrawer.colorComboName = "Custom " + (customIndex + 1);
 
-            watchView.faceDrawer.applySettingsFromCustomRing(tempSelection);
+            //Reject this if it's out of bounds
+            if (customIndex >= watchView.faceDrawer.customRings.size())
+                return;
+
+            JsonParser parser = new JsonParser();
+            JsonObject customFace = (JsonObject) parser.parse(watchView.faceDrawer.customRings.get(customIndex));
+            watchView.faceDrawer.applySettingsFromCustomRing(customFace);
             updateUIFromSettings();
         }
 
@@ -856,7 +849,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
      */
     public void saveCustomWatchFace(){
         // If we're editing a built in one, make a new face.
-        if (watchView.faceDrawer.colorComboName.indexOf("Custom ") == -1){
+        if (!watchView.faceDrawer.colorComboName.contains("Custom ")){
             watchView.faceDrawer.colorComboName = "Custom "+(watchView.faceDrawer.customRings.size()+1);
             watchView.faceDrawer.addUpdateCustomRing(this, watchView.faceDrawer.customRings.size());
         }

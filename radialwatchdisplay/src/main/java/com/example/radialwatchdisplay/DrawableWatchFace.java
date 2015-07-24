@@ -17,6 +17,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -204,7 +206,13 @@ public class DrawableWatchFace {
             // Otherwise, load settings from our custom ring...
             else{
                 int customIndex = Integer.parseInt(colorComboName.split("Custom ")[1]) - 1;
-                applySettingsFromCustomRing(customIndex);
+                //Reject this if it's out of bounds
+                if (customIndex >= customRings.size())
+                    return;
+
+                JsonParser parser = new JsonParser();
+                JsonObject customFace = (JsonObject) parser.parse(customRings.get(customIndex));
+                applySettingsFromCustomRing(customFace);
             }
         }
     }
@@ -220,49 +228,42 @@ public class DrawableWatchFace {
         saveCustomRings(context);
     }
 
-    public void applySettingsFromCustomRing(int customIndex){
-        //Reject this if it's out of bounds
-        if (customIndex >= customRings.size())
-            return;
+    public void applySettingsFromCustomRing(JsonObject customRingToLoadFrom){
+        if (customRingToLoadFrom.has("ringColor1"))
+            color1 = customRingToLoadFrom.get("ringColor1").getAsInt();
+        if (customRingToLoadFrom.has("ringColor2"))
+            color2 = customRingToLoadFrom.get("ringColor2").getAsInt();
+        if (customRingToLoadFrom.has("ringColor3"))
+            color3 = customRingToLoadFrom.get("ringColor3").getAsInt();
 
-        JsonParser parser = new JsonParser();
-        JsonObject customFace = (JsonObject) parser.parse(customRings.get(customIndex));
+        if (customRingToLoadFrom.has("bg"))
+            backgroundColor = customRingToLoadFrom.get("bg").getAsInt();
+        if (customRingToLoadFrom.has("textColor"))
+            textColor = customRingToLoadFrom.get("textColor").getAsInt();
+        if (customRingToLoadFrom.has("textAngle"))
+            textAngle = customRingToLoadFrom.get("textAngle").getAsInt();
+        if (customRingToLoadFrom.has("textStrokeColor"))
+            textStrokeColor = customRingToLoadFrom.get("textStrokeColor").getAsInt();
 
-        if (customFace.has("ringColor1"))
-            color1 = customFace.get("ringColor1").getAsInt();
-        if (customFace.has("ringColor2"))
-            color2 = customFace.get("ringColor2").getAsInt();
-        if (customFace.has("ringColor3"))
-            color3 = customFace.get("ringColor3").getAsInt();
+        if (customRingToLoadFrom.has("ringSizePercent"))
+            ringSizePercent = customRingToLoadFrom.get("ringSizePercent").getAsInt();
+        if (customRingToLoadFrom.has("textSizePercent"))
+            textSizePercent = customRingToLoadFrom.get("textSizePercent").getAsInt();
 
-        if (customFace.has("bg"))
-            backgroundColor = customFace.get("bg").getAsInt();
-        if (customFace.has("textColor"))
-            textColor = customFace.get("textColor").getAsInt();
-        if (customFace.has("textAngle"))
-            textAngle = customFace.get("textAngle").getAsInt();
-        if (customFace.has("textStrokeColor"))
-            textStrokeColor = customFace.get("textStrokeColor").getAsInt();
-
-        if (customFace.has("ringSizePercent"))
-            ringSizePercent = customFace.get("ringSizePercent").getAsInt();
-        if (customFace.has("textSizePercent"))
-            textSizePercent = customFace.get("textSizePercent").getAsInt();
-
-        if (customFace.has("enableText"))
-            bTextEnabled = customFace.get("enableText").getAsBoolean();
-        if (customFace.has("strokeText"))
-            bTextStroke = customFace.get("strokeText").getAsBoolean();
-        if (customFace.has("smoothAnim"))
-            bShowMilli = customFace.get("smoothAnim").getAsBoolean();
-        if (customFace.has("grayAmbient"))
-            bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
-        if (customFace.has("24hourtime"))
-            b24HourTime = customFace.get("24hourtime").getAsBoolean();
-        if (customFace.has("reverseRingOrder"))
-            bReverseRingOrder = customFace.get("reverseRingOrder").getAsBoolean();
-        if (customFace.has("showSeconds"))
-            bShowSeconds = customFace.get("showSeconds").getAsBoolean();
+        if (customRingToLoadFrom.has("enableText"))
+            bTextEnabled = customRingToLoadFrom.get("enableText").getAsBoolean();
+        if (customRingToLoadFrom.has("strokeText"))
+            bTextStroke = customRingToLoadFrom.get("strokeText").getAsBoolean();
+        if (customRingToLoadFrom.has("smoothAnim"))
+            bShowMilli = customRingToLoadFrom.get("smoothAnim").getAsBoolean();
+        if (customRingToLoadFrom.has("grayAmbient"))
+            bGrayAmbient = customRingToLoadFrom.get("grayAmbient").getAsBoolean();
+        if (customRingToLoadFrom.has("24hourtime"))
+            b24HourTime = customRingToLoadFrom.get("24hourtime").getAsBoolean();
+        if (customRingToLoadFrom.has("reverseRingOrder"))
+            bReverseRingOrder = customRingToLoadFrom.get("reverseRingOrder").getAsBoolean();
+        if (customRingToLoadFrom.has("showSeconds"))
+            bShowSeconds = customRingToLoadFrom.get("showSeconds").getAsBoolean();
     }
 
     public void convertSettingsToCustom(Context context) {
