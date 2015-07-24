@@ -94,9 +94,11 @@ public class DrawableWatchFace {
 
         mFontStrokePaint.setStyle(Paint.Style.STROKE);
         mFontStrokePaint.setTextSize(24);
+        mFontStrokePaint.setTextAlign(Paint.Align.CENTER);
         mFontStrokePaint.setStrokeWidth(2);
 
         mFontPaint.setColor(textColor);
+        mFontPaint.setTextAlign(Paint.Align.CENTER);
         mFontPaint.setTextSize(24);
 
         setBShowBackground(_bShowBackground);
@@ -420,11 +422,11 @@ public class DrawableWatchFace {
         //People think of a circle's origin starting at the top most, middle most point. Let's make that happen.
 
         Path secondsLabelPath = new Path();
-        secondsLabelPath.addArc(secondsOval, textAngle-93, 180);
+        secondsLabelPath.addArc(secondsOval, textAngle-180, 180);
         Path minutesLabelPath = new Path();
-        minutesLabelPath.addArc(minutesOval, textAngle-93, 90);
+        minutesLabelPath.addArc(minutesOval, textAngle-180, 180);
         Path hoursLabelPath = new Path();
-        hoursLabelPath.addArc(hoursOval, textAngle-93, 90);
+        hoursLabelPath.addArc(hoursOval, textAngle-180, 180);
 
         //If we don't need grayscale in ambient mode, do this the normal way...
         if (!bGrayAmbient || this.mActive) {
