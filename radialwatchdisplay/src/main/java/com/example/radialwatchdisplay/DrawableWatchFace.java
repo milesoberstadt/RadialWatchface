@@ -228,24 +228,41 @@ public class DrawableWatchFace {
         JsonParser parser = new JsonParser();
         JsonObject customFace = (JsonObject) parser.parse(customRings.get(customIndex));
 
-        color1 = customFace.get("ringColor1").getAsInt();
-        color2 = customFace.get("ringColor2").getAsInt();
-        color3 = customFace.get("ringColor3").getAsInt();
+        if (customFace.has("ringColor1"))
+            color1 = customFace.get("ringColor1").getAsInt();
+        if (customFace.has("ringColor2"))
+            color2 = customFace.get("ringColor2").getAsInt();
+        if (customFace.has("ringColor3"))
+            color3 = customFace.get("ringColor3").getAsInt();
 
-        backgroundColor = customFace.get("bg").getAsInt();
-        textColor = customFace.get("textColor").getAsInt();
-        textStrokeColor = customFace.get("textStrokeColor").getAsInt();
+        if (customFace.has("bg"))
+            backgroundColor = customFace.get("bg").getAsInt();
+        if (customFace.has("textColor"))
+            textColor = customFace.get("textColor").getAsInt();
+        if (customFace.has("textAngle"))
+            textAngle = customFace.get("textAngle").getAsInt();
+        if (customFace.has("textStrokeColor"))
+            textStrokeColor = customFace.get("textStrokeColor").getAsInt();
 
-        ringSizePercent = customFace.get("ringSizePercent").getAsInt();
-        textSizePercent = customFace.get("textSizePercent").getAsInt();
+        if (customFace.has("ringSizePercent"))
+            ringSizePercent = customFace.get("ringSizePercent").getAsInt();
+        if (customFace.has("textSizePercent"))
+            textSizePercent = customFace.get("textSizePercent").getAsInt();
 
-        bTextEnabled = customFace.get("enableText").getAsBoolean();
-        bTextStroke = customFace.get("strokeText").getAsBoolean();
-        bShowMilli = customFace.get("smoothAnim").getAsBoolean();
-        bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
-        b24HourTime = customFace.get("24hourtime").getAsBoolean();
-        bReverseRingOrder = customFace.get("reverseRingOrder").getAsBoolean();
-        bShowSeconds = customFace.get("showSeconds").getAsBoolean();
+        if (customFace.has("enableText"))
+            bTextEnabled = customFace.get("enableText").getAsBoolean();
+        if (customFace.has("strokeText"))
+            bTextStroke = customFace.get("strokeText").getAsBoolean();
+        if (customFace.has("smoothAnim"))
+            bShowMilli = customFace.get("smoothAnim").getAsBoolean();
+        if (customFace.has("grayAmbient"))
+            bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
+        if (customFace.has("24hourtime"))
+            b24HourTime = customFace.get("24hourtime").getAsBoolean();
+        if (customFace.has("reverseRingOrder"))
+            bReverseRingOrder = customFace.get("reverseRingOrder").getAsBoolean();
+        if (customFace.has("showSeconds"))
+            bShowSeconds = customFace.get("showSeconds").getAsBoolean();
     }
 
     public void convertSettingsToCustom(Context context) {
@@ -275,6 +292,7 @@ public class DrawableWatchFace {
         customRing.addProperty("bg", backgroundColor);
         customRing.addProperty("textColor", textColor);
         customRing.addProperty("textStrokeColor", textStrokeColor);
+        customRing.addProperty("textAngle", textAngle);
         customRing.addProperty("ringSizePercent", ringSizePercent);
         customRing.addProperty("textSizePercent", textSizePercent);
 

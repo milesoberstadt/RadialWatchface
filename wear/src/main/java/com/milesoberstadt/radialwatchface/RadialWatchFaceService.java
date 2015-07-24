@@ -252,6 +252,9 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                     if (dm.containsKey("textSizePercent")){
                         faceDrawer.textSizePercent = dm.getInt("textSizePercent", faceDrawer.textSizePercent);
                     }
+                    if (dm.containsKey("textAngle")){
+                        faceDrawer.textAngle = dm.getFloat("textAngle", faceDrawer.textAngle);
+                    }
                     if (dm.containsKey("reverseRingOrder"))
                         faceDrawer.bReverseRingOrder = dm.getBoolean("reverseRingOrder", faceDrawer.bReverseRingOrder);
                     if (dm.containsKey("showSeconds"))

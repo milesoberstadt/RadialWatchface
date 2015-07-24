@@ -562,6 +562,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         dataMap.getDataMap().putBoolean("showSeconds", watchView.faceDrawer.bShowSeconds);
         dataMap.getDataMap().putInt("ringSizePercent", watchView.faceDrawer.ringSizePercent);
         dataMap.getDataMap().putInt("textSizePercent", watchView.faceDrawer.textSizePercent);
+        dataMap.getDataMap().putFloat("textAngle", watchView.faceDrawer.textAngle);
 
         PutDataRequest request = dataMap.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
