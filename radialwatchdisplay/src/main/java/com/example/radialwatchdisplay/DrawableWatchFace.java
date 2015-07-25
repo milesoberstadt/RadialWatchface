@@ -174,7 +174,7 @@ public class DrawableWatchFace {
             //If we're using new settings, but have no custom rings, check yourself before you rek yourself
             else{
                 //Check for an invalid face...
-                if (colorComboName.indexOf("Custom") != -1) {
+                if (!colorComboName.contains("Custom")) {
                     colorComboName = "RGB";
                     resetDefaultStyle();
                     return;
@@ -183,7 +183,7 @@ public class DrawableWatchFace {
 
 
             // If we're using a built in face, load it's settings!
-            if (colorComboName.indexOf("Custom") == -1){
+            if (!colorComboName.contains("Custom")){
                 Resources res = context.getResources();
                 ArrayList<Integer> colorArraysToFetch = new ArrayList<>();
                 colorArraysToFetch.add(R.array.watch_rgb_array);
@@ -264,25 +264,6 @@ public class DrawableWatchFace {
             bReverseRingOrder = customRingToLoadFrom.get("reverseRingOrder").getAsBoolean();
         if (customRingToLoadFrom.has("showSeconds"))
             bShowSeconds = customRingToLoadFrom.get("showSeconds").getAsBoolean();
-    }
-
-    public void convertSettingsToCustom(Context context) {
-        settings = PreferenceManager.getDefaultSharedPreferences(context);
-
-        //Check for default settings
-        int tempRing1 = -1;
-        tempRing1 = settings.getInt("ringColor1", -1);
-        if (tempRing1 != -1){
-            colorComboName = "Custom 1";
-            //If we have any of these settings, remove them, we'll start making custom faces.
-            editor = settings.edit();
-            editor.clear();
-            editor.putString("watchFaceCombo", colorComboName);
-            editor.apply();
-
-            //Make a new custom ring out of the current settings
-            addUpdateCustomRing(context, 0);
-        }
     }
 
     public void addUpdateCustomRing(Context context, int customIndex){

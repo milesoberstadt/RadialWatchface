@@ -98,7 +98,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         //Get our saved prefs
         watchView.faceDrawer.loadSettings(this);
         // Upgrade existing settings
-        watchView.faceDrawer.convertSettingsToCustom(this);
+        //watchView.faceDrawer.convertSettingsToCustom(this);
 
         watchLabel = (TextView) findViewById(R.id.watchFaceText);
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
@@ -133,6 +133,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         //Once we're connected, send all our previously set settings...
         sendAllSettings();
+
+        //Call this before the event listeners, that way changes don't create a new custom ring set
+        updateUIFromSettings();
 
         pickFaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -463,8 +466,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 sendAllSettings();
             }
         });
-
-        updateUIFromSettings();
     }
 
     @Override
