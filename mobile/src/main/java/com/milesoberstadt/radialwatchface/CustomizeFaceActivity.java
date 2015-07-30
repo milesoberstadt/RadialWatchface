@@ -51,6 +51,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
     private ArrayList<View> customRingViews = new ArrayList<>();
 
+    private Boolean bChangingRingPresets = false;
+
     private final Context context = this;
 
     private AlertDialog alertDialog = null;
@@ -560,12 +562,15 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             if (clickedView == null) {
                 return;
             }
+            bChangingRingPresets = true;
 
             copySettingsFromOneFaceToAnother(clickedView.faceDrawer, watchView.faceDrawer);
 
             updateUIFromSettings();
 
             sendAllSettings();
+
+            bChangingRingPresets = false;
 
             watchLabel.setText("Current Face: "+watchView.faceDrawer.colorComboName);
 
@@ -796,6 +801,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
      * watch face. If you aren't it'll save settings to the selected custom watch face.
      */
     public void saveCustomWatchFace(){
+        // Exit if we're just changing presets...
+        if (bChangingRingPresets)
+            return;
         // If we're editing a built in one, make a new face.
         if (watchView.faceDrawer.colorComboName.indexOf("Custom ") == -1){
             watchView.faceDrawer.colorComboName = "Custom "+(watchView.faceDrawer.customRings.size()+1);
