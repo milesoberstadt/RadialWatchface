@@ -121,6 +121,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 .addApi(Wearable.API)
                 .build();
 
+        //Do this before we set listeners so we don't make unnecessary custom faces...
+        updateUIFromSettings();
+
         //Once we're connected, send all our previously set settings...
         sendAllSettings();
 
@@ -423,8 +426,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 sendAllSettings();
             }
         });
-
-        updateUIFromSettings();
     }
 
     @Override
