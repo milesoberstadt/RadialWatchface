@@ -118,7 +118,7 @@ public class DrawableWatchFace {
         b24HourTime = false;
     }
 
-    public void loadSettings(Context context){
+    public void loadSettingsLegacy(Context context){
         settings = PreferenceManager.getDefaultSharedPreferences(context);
         //editor = settings.edit();
         //Get specific prefs, with defaults
@@ -149,6 +149,20 @@ public class DrawableWatchFace {
             bShowMilli = settings.getBoolean("smoothAnim", false);
             bGrayAmbient = settings.getBoolean("grayAmbient", false);
             b24HourTime = settings.getBoolean("24hourtime", false);
+        }
+    }
+
+    public void loadSettings(Context context){
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
+        //editor = settings.edit();
+        //Get specific prefs, with defaults
+        int tmp1 = settings.getInt("ringColor1", -1);
+        int tmp2 = settings.getInt("ringColor2", -1);
+        int tmp3 = settings.getInt("ringColor3", -1);
+
+        // If we've got these, we're using legacy settings, if not, let's use new stuff.
+        if (tmp1 != -1 && tmp2 != -1 && tmp3 != -1){
+            loadSettingsLegacy(context);
         }
         // Otherwise, use new settings...
         else{
@@ -288,6 +302,11 @@ public class DrawableWatchFace {
     }
 
     public void saveCustomRings(Context context){
+        //If we aren't on a default, and have no rings, make a custom one just in time (usually for watch)
+        if (colorComboName.contains("Custom ") && customRings.size() == 0){
+            addUpdateCustomRing(context, 0);
+        }
+
         settings = PreferenceManager.getDefaultSharedPreferences(context);
         editor = settings.edit();
 

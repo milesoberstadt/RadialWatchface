@@ -496,13 +496,21 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         String textCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textColor));
         String textSCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textStrokeColor));
 
-        PutDataMapRequest dataMap = PutDataMapRequest.create("/color");
+        PutDataMapRequest dataMap = PutDataMapRequest.create("/radialwatchface");
         dataMap.getDataMap().putString("color1", col1);
         dataMap.getDataMap().putString("color2", col2);
         dataMap.getDataMap().putString("color3", col3);
         dataMap.getDataMap().putString("bg", bg);
         dataMap.getDataMap().putString("textColor", textCol);
         dataMap.getDataMap().putString("textStrokeColor", textSCol);
+        dataMap.getDataMap().putString("watchFaceCombo", watchView.faceDrawer.colorComboName);
+        dataMap.getDataMap().putBoolean("enableText", watchView.faceDrawer.bTextEnabled);
+        dataMap.getDataMap().putBoolean("24hourtime", watchView.faceDrawer.b24HourTime);
+        dataMap.getDataMap().putBoolean("strokeText", watchView.faceDrawer.bTextStroke);
+        dataMap.getDataMap().putBoolean("smoothAnim", watchView.faceDrawer.bShowMilli);
+        dataMap.getDataMap().putBoolean("grayAmbient", watchView.faceDrawer.bGrayAmbient);
+        dataMap.getDataMap().putInt("ringSizePercent", watchView.faceDrawer.ringSizePercent);
+        dataMap.getDataMap().putInt("textSizePercent", watchView.faceDrawer.textSizePercent);
         PutDataRequest request = dataMap.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
                 .putDataItem(mGoogleApiClient, request);
@@ -516,31 +524,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     Log.d(TAG, "Wow, so fail: " + dataItemResult.getStatus().toString());
             }
         });
-
-        PutDataMapRequest dataMap2 = PutDataMapRequest.create("/text");
-        dataMap2.getDataMap().putBoolean("enableText", watchView.faceDrawer.bTextEnabled);
-        dataMap2.getDataMap().putBoolean("24hourtime", watchView.faceDrawer.b24HourTime);
-        dataMap2.getDataMap().putBoolean("strokeText", watchView.faceDrawer.bTextStroke);
-        dataMap2.getDataMap().putBoolean("smoothAnim", watchView.faceDrawer.bShowMilli);
-        dataMap2.getDataMap().putBoolean("grayAmbient", watchView.faceDrawer.bGrayAmbient);
-        dataMap2.getDataMap().putInt("ringSizePercent", watchView.faceDrawer.ringSizePercent);
-        dataMap2.getDataMap().putInt("textSizePercent", watchView.faceDrawer.textSizePercent);
-
-        PutDataRequest request2 = dataMap2.asPutDataRequest();
-        PendingResult<DataApi.DataItemResult> pendingResult2 = Wearable.DataApi
-                .putDataItem(mGoogleApiClient, request2);
-
-        pendingResult2.setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
-            @Override
-            public void onResult(DataApi.DataItemResult dataItemResult) {
-                if (dataItemResult.getStatus().isSuccess()) {
-                    Log.d(TAG, "Data item set: " + dataItemResult.getDataItem().getUri());
-                }
-                else
-                    Log.d(TAG, "Wow, so fail: "+dataItemResult.getStatus().toString());
-            }
-        });
-
     }
 
     // TODO: Make this actually happen again

@@ -258,6 +258,9 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                     if (dm.containsKey("textSizePercent")){
                         faceDrawer.textSizePercent = dm.getInt("textSizePercent");
                     }
+                    if (dm.containsKey("watchFaceCombo")){
+                        faceDrawer.colorComboName = dm.getString("watchFaceCombo");
+                    }
                 }
             }
 
