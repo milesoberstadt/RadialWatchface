@@ -15,3 +15,8 @@ manifest-merger-release-report.txt
 mobile/mobile.iml
 radialwatchdisplay/radialwatchdisplay.iml
 *.iml
+.idea/gradle.xml
+mobile/mobile.iml
+RadialWatchFace.iml
+wear/wear.iml
+mobile/mobile.iml
