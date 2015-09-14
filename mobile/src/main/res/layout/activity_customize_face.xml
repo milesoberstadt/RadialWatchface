@@ -319,7 +319,22 @@
                 android:text="@string/show_seconds"
                 android:id="@+id/show_seconds_switch"/>
 
-
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/donate"
+                android:id="@+id/donate_text_View"
+                style="?android:listSeparatorTextViewStyle"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/donate"
+                android:id="@+id/donate_button"
+                />
         </LinearLayout>
 
     </ScrollView>

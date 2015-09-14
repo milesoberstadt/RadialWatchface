@@ -33,8 +33,13 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.milesoberstadt.util.IabHelper;
+import com.milesoberstadt.util.IabResult;
+import com.milesoberstadt.util.Inventory;
+import com.milesoberstadt.util.Purchase;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class CustomizeFaceActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -43,7 +48,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private CanvasDrawnRingView watchView;
     private TextView watchLabel;
 
-    private Button pickFaceButton, swapTextStrokeButton;
+    private Button pickFaceButton, swapTextStrokeButton, donateButton;
     private CircleView pickRing1, pickRing2, pickRing3,
             pickBackgroundButton, pickTextColorButton, pickTextStrokeButton;
     private SeekBar textSizeSeek, textAngleSeek, ringSizeSeek;
@@ -75,8 +80,12 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private String TAG = "LOLTEST";
 
     private GoogleApiClient mGoogleApiClient = null;
+    private IabHelper mHelper;
+
     private String mPeerId;
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
+
+    private String SKU_DONATE = "radialwatch_donate";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +132,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         reverseOrderSwitch = (Switch) findViewById(R.id.reverse_ring_order_switch);
         showSecondsSwitch = (Switch) findViewById(R.id.show_seconds_switch);
 
+        donateButton = (Button) findViewById(R.id.donate_button);
+
         graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -130,6 +141,21 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 .addOnConnectionFailedListener(this)
                 .addApi(Wearable.API)
                 .build();
+
+        // Billing lib
+        String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr9lOZF0gMyuWeWY0WPl9lQbxcaSfBmbK6rKugnh6HhJkDo1OAM3z57stwfh79ZBDkum8bz0c4OlJQoHeP1fwKKhfHtALxKywliey7Oe2DZi/VQOGK/LpSam0+B8IAUJU3tx74/NBueLyer9xeuXtk1uc0SyVaqP9S8fSKCwpegmidp7QernYZa+GKsl53fIOeoZoUjkUmeidxux9u/D5Dl17IlXy55VK6FNwESGcywjxGvJdYVraCcH9lfWahQsYTJL46LwW/2wcziYJYBiNnPMQyRY0OCl8AjnoA9LL5/xCa6vZmPKTLBNmaovnWZl9iQ+PBDBsW2GgC7EOeG7jMwIDAQAB";
+        mHelper = new IabHelper(this, base64EncodedPublicKey);
+
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            @Override
+            public void onIabSetupFinished(IabResult result) {
+                if (!result.isSuccess()) {
+                    // uhh... issue here...
+                    Log.d(TAG, "Problem setting up billing: " + result);
+                }
+                //Otherwise it's working!
+            }
+        });
 
         //Once we're connected, send all our previously set settings...
         sendAllSettings();
@@ -467,6 +493,46 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 sendAllSettings();
             }
         });
+
+        donateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Show the info about donating...
+                List productSKUs = new ArrayList();
+                productSKUs.add(SKU_DONATE);
+                mHelper.queryInventoryAsync(true, productSKUs, mQueryFinishedListener);
+
+
+            }
+
+            IabHelper.QueryInventoryFinishedListener mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
+                @Override
+                public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+                    if (result.isFailure()){
+                        // Whoops.
+                        Log.d(TAG, "Failed to get inventory");
+                    }
+
+                    String donatePrice = inv.getSkuDetails(SKU_DONATE).getPrice();
+                    Log.d(TAG, "Got donate price: "+donatePrice);
+
+                    mHelper.launchPurchaseFlow((Activity) getApplicationContext(), SKU_DONATE, 10001, mPurchaseFinishedListener, "");
+                }
+            };
+
+            IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+                @Override
+                public void onIabPurchaseFinished(IabResult result, Purchase info) {
+                    if (result.isFailure()) {
+                        Log.d(TAG, "Error purchasing: " + result);
+                        return;
+                    }
+                    else if (info.getSku().equals(SKU_DONATE)) {
+                        // They bought it, show a thank you toast!
+                    }
+                }
+            };
+        });
     }
 
     @Override
@@ -523,6 +589,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     protected void onDestroy() {
         super.onDestroy();
         mGoogleApiClient.disconnect();
+        if (mHelper != null)
+            mHelper.dispose();
+        mHelper = null;
     }
 
     private void sendAllSettings(){
