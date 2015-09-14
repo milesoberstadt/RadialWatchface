@@ -501,8 +501,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 List productSKUs = new ArrayList();
                 productSKUs.add(SKU_DONATE);
                 mHelper.queryInventoryAsync(true, productSKUs, mQueryFinishedListener);
-
-
             }
 
             IabHelper.QueryInventoryFinishedListener mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
@@ -516,7 +514,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     String donatePrice = inv.getSkuDetails(SKU_DONATE).getPrice();
                     Log.d(TAG, "Got donate price: "+donatePrice);
 
-                    mHelper.launchPurchaseFlow((Activity) getApplicationContext(), SKU_DONATE, 10001, mPurchaseFinishedListener, "");
+                    //TODO: Fix this, this crashes the app, we need the activity
+                    mHelper.launchPurchaseFlow((Activity)getApplicationContext(), SKU_DONATE, 10001, mPurchaseFinishedListener, "");
                 }
             };
 
