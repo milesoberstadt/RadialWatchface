@@ -439,7 +439,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         graySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                //Nothing to display (phone can't be ambient) just send changes...
+                watchView.faceDrawer.bGrayAmbient = graySwitch.isChecked();
+
                 saveCustomWatchFace();
                 sendAllSettings();
             }
