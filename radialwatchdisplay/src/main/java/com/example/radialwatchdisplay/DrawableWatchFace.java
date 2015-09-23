@@ -170,12 +170,7 @@ public class DrawableWatchFace {
 
             String customRingsFromSettings = settings.getString("customRings", "");
             if (customRingsFromSettings != ""){
-                JsonParser parser = new JsonParser();
-                JsonElement foundElemetnt = parser.parse(customRingsFromSettings);
-                JsonArray loadedArray = foundElemetnt.getAsJsonArray();
-                for (int i=0; i<loadedArray.size(); i++){
-                    customRings.add((loadedArray.get(i).toString()));
-                }
+                buildCustomRingsFromString(customRingsFromSettings);
             }
 
             //If we're using new settings, but have no custom rings, check yourself before you rek yourself
@@ -188,27 +183,9 @@ public class DrawableWatchFace {
                 }
             }
 
-
             // If we're using a built in face, load it's settings!
             if (colorComboName.indexOf("Custom") == -1){
-                Resources res = context.getResources();
-                ArrayList<Integer> colorArraysToFetch = new ArrayList<>();
-                colorArraysToFetch.add(R.array.watch_rgb_array);
-                colorArraysToFetch.add(R.array.watch_cmy_array);
-                colorArraysToFetch.add(R.array.watch_crayon_array);
-                colorArraysToFetch.add(R.array.watch_gray_array);
-                colorArraysToFetch.add(R.array.watch_pastels_array);
-
-                String[] colorNames = res.getStringArray(R.array.watch_faces);
-                int facePos = Arrays.asList(colorNames).indexOf(colorComboName);
-                if (facePos > -1){
-                    resetDefaultStyle();
-
-                    String[] colors = res.getStringArray(colorArraysToFetch.get(facePos));
-                    color1 = Color.parseColor(colors[0]);
-                    color2 = Color.parseColor(colors[1]);
-                    color3 = Color.parseColor(colors[2]);
-                }
+                applySettingsFromPresetRing(context);
             }
             // Otherwise, load settings from our custom ring...
             else{
@@ -227,6 +204,18 @@ public class DrawableWatchFace {
         editor.apply();
 
         saveCustomRings(context);
+    }
+
+    public void buildCustomRingsFromString(String sourceString){
+        JsonParser parser = new JsonParser();
+        JsonElement foundElement = parser.parse(sourceString);
+        JsonArray loadedArray = foundElement.getAsJsonArray();
+        for (int i=0; i<loadedArray.size(); i++){
+            if (customRings.size() <= i)
+                customRings.add(loadedArray.get(i).toString());
+            else
+                customRings.set(i, (loadedArray.get(i).toString()));
+        }
     }
 
     public void applySettingsFromCustomRing(int customIndex){
@@ -253,6 +242,27 @@ public class DrawableWatchFace {
         bShowMilli = customFace.get("smoothAnim").getAsBoolean();
         bGrayAmbient = customFace.get("grayAmbient").getAsBoolean();
         b24HourTime = customFace.get("24hourtime").getAsBoolean();
+    }
+
+    public void applySettingsFromPresetRing(Context context){
+        Resources res = context.getResources();
+        ArrayList<Integer> colorArraysToFetch = new ArrayList<>();
+        colorArraysToFetch.add(R.array.watch_rgb_array);
+        colorArraysToFetch.add(R.array.watch_cmy_array);
+        colorArraysToFetch.add(R.array.watch_crayon_array);
+        colorArraysToFetch.add(R.array.watch_gray_array);
+        colorArraysToFetch.add(R.array.watch_pastels_array);
+
+        String[] colorNames = res.getStringArray(R.array.watch_faces);
+        int facePos = Arrays.asList(colorNames).indexOf(colorComboName);
+        if (facePos > -1){
+            resetDefaultStyle();
+
+            String[] colors = res.getStringArray(colorArraysToFetch.get(facePos));
+            color1 = Color.parseColor(colors[0]);
+            color2 = Color.parseColor(colors[1]);
+            color3 = Color.parseColor(colors[2]);
+        }
     }
 
     public void convertSettingsToCustom(Context context) {

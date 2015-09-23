@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.wearable.watchface.CanvasWatchFaceService;
@@ -218,53 +217,27 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                     byte[] diBytes = di.getData();
                     DataMap dm =  DataMap.fromByteArray(diBytes);
 
-                    if (dm.containsKey("color1"))
-                        faceDrawer.color1 = Color.parseColor(dm.getString("color1"));
-                    if (dm.containsKey("color2"))
-                        faceDrawer.color2 = Color.parseColor(dm.getString("color2"));
-                    if (dm.containsKey("color3"))
-                        faceDrawer.color3 = Color.parseColor(dm.getString("color3"));
-                    if (dm.containsKey("bg"))
-                        faceDrawer.backgroundColor = Color.parseColor(dm.getString("bg"));
-                    // Parse text colors...
-                    if (dm.containsKey("textColor"))
-                        faceDrawer.textColor = Color.parseColor(dm.getString("textColor"));
-                    if (dm.containsKey("textStrokeColor"))
-                        faceDrawer.textStrokeColor = Color.parseColor(dm.getString("textStrokeColor"));
-
-                    if (dm.containsKey("enableText")){
-                        faceDrawer.bTextEnabled = dm.getBoolean("enableText");
-                    }
-                    // TODO: Remove this, it's in for legacy theme support...
-                    if (dm.containsKey("invertText")){
-                        faceDrawer.textColor = 0xFF000000;
-                        faceDrawer.textStrokeColor = 0xFFFFFFFF;
-                    }
-                    if (dm.containsKey("strokeText")){
-                        faceDrawer.bTextStroke = dm.getBoolean("strokeText");
-                    }
-                    if (dm.containsKey("smoothAnim")){
-                        faceDrawer.bShowMilli = dm.getBoolean("smoothAnim");
-                    }
-                    if (dm.containsKey("grayAmbient")){
-                        faceDrawer.bGrayAmbient = dm.getBoolean("grayAmbient");
-                    }
-                    if (dm.containsKey("24hourtime")){
-                        faceDrawer.b24HourTime = dm.getBoolean("24hourtime");
-                    }
-                    if (dm.containsKey("ringSizePercent")){
-                        faceDrawer.ringSizePercent = dm.getInt("ringSizePercent");
-                    }
-                    if (dm.containsKey("textSizePercent")){
-                        faceDrawer.textSizePercent = dm.getInt("textSizePercent");
-                    }
                     if (dm.containsKey("watchFaceCombo")){
                         faceDrawer.colorComboName = dm.getString("watchFaceCombo");
+                    }
+                    if (dm.containsKey("customRings")){
+                        // Expose this string so I can see it in debugging...
+                        String receivedCustomRings = dm.getString("customRings");
+                        //Log.d(TAG, receivedCustomRings);
+                        faceDrawer.buildCustomRingsFromString(receivedCustomRings);
+
+                        if (faceDrawer.colorComboName.contains("Custom")) {
+                            int customIndex = Integer.parseInt(faceDrawer.colorComboName.split("Custom ")[1]) - 1;
+                            faceDrawer.applySettingsFromCustomRing(customIndex);
+                        }
+                        else
+                            faceDrawer.applySettingsFromPresetRing(getApplicationContext());
                     }
                 }
             }
 
             faceDrawer.saveSettings(getApplicationContext());
+            //faceDrawer.loadSettings(getApplicationContext());
         }
 
         @Override

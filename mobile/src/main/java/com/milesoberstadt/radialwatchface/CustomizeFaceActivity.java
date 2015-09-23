@@ -30,6 +30,7 @@ import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -491,28 +492,20 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         //This pretty much just always needs to be done...
         watchView.faceDrawer.saveSettings(getApplicationContext());
 
-        String col1 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color1));
-        String col2 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color2));
-        String col3 = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.color3));
-        String bg = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.backgroundColor));
-        String textCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textColor));
-        String textSCol = String.format("#%06X", (0xFFFFFF & watchView.faceDrawer.textStrokeColor));
-
+        // Make our data request object
         PutDataMapRequest dataMap = PutDataMapRequest.create("/radialwatchface");
-        dataMap.getDataMap().putString("color1", col1);
-        dataMap.getDataMap().putString("color2", col2);
-        dataMap.getDataMap().putString("color3", col3);
-        dataMap.getDataMap().putString("bg", bg);
-        dataMap.getDataMap().putString("textColor", textCol);
-        dataMap.getDataMap().putString("textStrokeColor", textSCol);
+
         dataMap.getDataMap().putString("watchFaceCombo", watchView.faceDrawer.colorComboName);
-        dataMap.getDataMap().putBoolean("enableText", watchView.faceDrawer.bTextEnabled);
-        dataMap.getDataMap().putBoolean("24hourtime", watchView.faceDrawer.b24HourTime);
-        dataMap.getDataMap().putBoolean("strokeText", watchView.faceDrawer.bTextStroke);
-        dataMap.getDataMap().putBoolean("smoothAnim", watchView.faceDrawer.bShowMilli);
-        dataMap.getDataMap().putBoolean("grayAmbient", watchView.faceDrawer.bGrayAmbient);
-        dataMap.getDataMap().putInt("ringSizePercent", watchView.faceDrawer.ringSizePercent);
-        dataMap.getDataMap().putInt("textSizePercent", watchView.faceDrawer.textSizePercent);
+
+        // Send all the custom faces...
+        JsonArray ringsArray = new JsonArray();
+        JsonParser parser = new JsonParser();
+        for (int i=0; i<watchView.faceDrawer.customRings.size(); i++) {
+            ringsArray.add(parser.parse(watchView.faceDrawer.customRings.get(i)));
+        }
+
+        dataMap.getDataMap().putString("customRings", ringsArray.toString());
+
         PutDataRequest request = dataMap.asPutDataRequest();
         PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
                 .putDataItem(mGoogleApiClient, request);
