@@ -4,7 +4,7 @@
 /.idea/libraries
 .DS_Store
 /build
-
+*.iml
 *.apk
 .idea/vcs.xml
 .idea/gradle.xml
@@ -14,7 +14,6 @@ manifest-merger-release-report.txt
 .idea/gradle.xml
 mobile/mobile.iml
 radialwatchdisplay/radialwatchdisplay.iml
-*.iml.idea/compiler.xml
 .idea/copyright
 .idea/encodings.xml
 .idea/misc.xml
