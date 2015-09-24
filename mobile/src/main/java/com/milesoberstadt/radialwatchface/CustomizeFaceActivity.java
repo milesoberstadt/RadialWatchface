@@ -424,7 +424,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         graySwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Nothing to display (phone can't be ambient) just send changes...
+                watchView.faceDrawer.bGrayAmbient = graySwitch.isChecked();
+
                 saveCustomWatchFace();
                 sendAllSettings();
             }
