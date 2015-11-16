@@ -50,6 +50,8 @@ import com.milesoberstadt.util.Purchase;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -95,33 +97,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
     private GoogleApiClient mGoogleApiClient = null;
     private IabHelper mHelper;
-    private IInAppBillingService mService;
-    private ServiceConnection mServiceConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = IInAppBillingService.Stub.asInterface(service);
-            // Use this opportunity to see if this user has donated, if so, don't bug them for donating again.
-            try {
-                Bundle ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
-                int response = ownedItems.getInt("RESPONSE_CODE");
-                if (response == 0){
-                    ArrayList<String> ownedSkus = ownedItems.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
-                    if (ownedSkus.contains(SKU_DONATE)){
-                        // They've already donated!
-                        bBoughtDonation = true;
-                    }
-                }
-            }
-            catch (Exception e){
-                Log.d(TAG, "Error getting owned items: "+e.getMessage());
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-        }
-    };
+    // We also need to be able to generate a sessionID...
+    private SecureRandom random = new SecureRandom();
 
     private String mPeerId;
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
@@ -175,7 +152,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         donateButton = (Button) findViewById(R.id.donate_button);
         if (bBoughtDonation)
-            donateButton.setVisibility(0);
+            donateButton.setVisibility(View.INVISIBLE);
 
         graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
 
@@ -199,10 +176,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 //Otherwise it's working!
             }
         });
-
-        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
 
         //Once we're connected, send all our previously set settings...
         sendAllSettings();
@@ -553,7 +526,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
 
                 // mService is null when we can't connect to Play Services...
-                if (mService != null){
+                /*if (mService != null){
                     try {
                         Bundle skuDetails = mService.getSkuDetails(3, getPackageName(), "inapp", querySkus);
                         int response = skuDetails.getInt("RESPONSE_CODE");
@@ -591,16 +564,16 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                                 });
                                 AlertDialog donateDialog = donateBuilder.create();
 
-
+                                donateDialog.show();
                             }
                         }
                     }
                     catch (Exception e){
                         Log.d(TAG, "Error getting details "+e.getMessage());
                     }
-                }
+                }*/
 
-                //mHelper.queryInventoryAsync(true, productSKUs, mQueryFinishedListener);
+                mHelper.queryInventoryAsync(true, productSKUs, mQueryFinishedListener);
             }
 
             IabHelper.QueryInventoryFinishedListener mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
@@ -612,25 +585,27 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                     }
 
                     String donatePrice = inv.getSkuDetails(SKU_DONATE).getPrice();
-                    Log.d(TAG, "Got donate price: "+donatePrice);
+                    Log.d(TAG, "Got donate price: " + donatePrice);
 
-                    //TODO: Fix this, this crashes the app, we need the activity
-                    mHelper.launchPurchaseFlow((Activity)getApplicationContext(), SKU_DONATE, 10001, mPurchaseFinishedListener, "");
+                    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+                        @Override
+                        public void onIabPurchaseFinished(IabResult result, Purchase info) {
+                            if (result.isFailure()) {
+                                Log.d(TAG, "Error purchasing: " + result);
+                                Toast.makeText(CustomizeFaceActivity.this, "Donation failed.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            else if (info.getSku().equals(SKU_DONATE)) {
+                                // They bought it, show a thank you toast!
+                                Toast.makeText(CustomizeFaceActivity.this, "Thank you so much for donating!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    };
+
+                    showDonateDialog(mPurchaseFinishedListener);
                 }
             };
 
-            IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
-                @Override
-                public void onIabPurchaseFinished(IabResult result, Purchase info) {
-                    if (result.isFailure()) {
-                        Log.d(TAG, "Error purchasing: " + result);
-                        return;
-                    }
-                    else if (info.getSku().equals(SKU_DONATE)) {
-                        // They bought it, show a thank you toast!
-                    }
-                }
-            };
         });
     }
 
@@ -646,27 +621,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             mGoogleApiClient.disconnect();
         }
         super.onStop();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        if (requestCode == DONATE_FLAG){
-            int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-
-            if (resultCode == RESULT_OK) {
-                try {
-                    JSONObject jo = new JSONObject(purchaseData);
-                    //String sku = jo.getString("productId");
-                    Toast.makeText(CustomizeFaceActivity.this, "Thank you so much for donating!", Toast.LENGTH_SHORT).show();
-                }
-                catch (JSONException e) {
-                    Toast.makeText(CustomizeFaceActivity.this, "Donation failed.", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 
     @Override // GoogleApiClient.ConnectionCallbacks
@@ -712,8 +666,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         if (mHelper != null)
             mHelper.dispose();
         mHelper = null;
-        if (mService != null)
-            unbindService(mServiceConn);
     }
 
     private void sendAllSettings(){
@@ -1051,6 +1003,30 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             int customIndex = Integer.parseInt(watchView.faceDrawer.colorComboName.split("Custom ")[1])-1;
             watchView.faceDrawer.addUpdateCustomRing(this, customIndex);
         }
+    }
+
+    private void showDonateDialog(final IabHelper.OnIabPurchaseFinishedListener finishedListener){
+        // Don't start our billing intent until we get a second okay from the user
+        AlertDialog.Builder donateBuilder = new AlertDialog.Builder(this);
+        donateBuilder.setTitle(R.string.donate);
+        donateBuilder.setMessage(R.string.donate_description);
+        donateBuilder.setPositiveButton(R.string.donate, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                mHelper.launchPurchaseFlow(CustomizeFaceActivity.this, SKU_DONATE, 10001, finishedListener, nextSessionId());
+            }
+        });
+        donateBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog donateDialog = donateBuilder.create();
+
+        donateDialog.show();
+    }
+
+    public String nextSessionId() {
+        return new BigInteger(130, random).toString(32);
     }
 
 
