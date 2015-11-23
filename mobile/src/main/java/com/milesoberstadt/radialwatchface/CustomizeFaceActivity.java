@@ -2,24 +2,34 @@ package com.milesoberstadt.radialwatchface;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.preference.DialogPreference;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.vending.billing.IInAppBillingService;
 import com.chiralcode.colorpicker.ColorPickerDialog;
 import com.example.radialwatchdisplay.DrawableWatchFace;
 import com.google.android.gms.common.ConnectionResult;
@@ -33,8 +43,18 @@ import com.google.android.gms.wearable.Wearable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.milesoberstadt.util.IabHelper;
+import com.milesoberstadt.util.IabResult;
+import com.milesoberstadt.util.Inventory;
+import com.milesoberstadt.util.Purchase;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class CustomizeFaceActivity extends Activity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -43,12 +63,13 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private CanvasDrawnRingView watchView;
     private TextView watchLabel;
 
-    private Button pickFaceButton, swapTextStrokeButton;
+    private Button pickFaceButton, swapTextStrokeButton, donateButton;
     private CircleView pickRing1, pickRing2, pickRing3,
             pickBackgroundButton, pickTextColorButton, pickTextStrokeButton;
-    private SeekBar textSizeSeek, ringSizeSeek;
+    private SeekBar textSizeSeek, textAngleSeek, ringSizeSeek;
 
-    private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch;
+    private Switch textSwitch, militarySwitch, strokeSwitch, smoothSwitch, graySwitch,
+            reverseOrderSwitch, showSecondsSwitch;
 
     private ArrayList<View> customRingViews = new ArrayList<>();
 
@@ -74,15 +95,28 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     };
 
     private String TAG = "LOLTEST";
+    private int DONATE_FLAG = 1001;
+    private boolean bBoughtDonation = false;
 
     private GoogleApiClient mGoogleApiClient = null;
+    private IabHelper mHelper;
+    // We also need to be able to generate a sessionID...
+    private SecureRandom random = new SecureRandom();
+
     private String mPeerId;
     private static final String PATH_WITH_FEATURE = "/watch_face_config/Digital";
+
+    private String SKU_DONATE = "radialwatch_donate";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActionBar().hide();
+        try {
+            getActionBar().hide();
+        }
+        catch (NullPointerException e){
+            Log.d(TAG, "Couldn't hide actionBar because: "+e.getMessage());
+        }
         setContentView(R.layout.activity_customize_face);
 
         Log.d(TAG, "onCreate");
@@ -94,7 +128,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         //Get our saved prefs
         watchView.faceDrawer.loadSettings(this);
         // Upgrade existing settings
-        watchView.faceDrawer.convertSettingsToCustom(this);
+        //watchView.faceDrawer.convertSettingsToCustom(this);
 
         watchLabel = (TextView) findViewById(R.id.watchFaceText);
         pickFaceButton = (Button) findViewById(R.id.changeFaceButton);
@@ -107,6 +141,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         pickBackgroundButton = (CircleView) findViewById(R.id.bg_color_preview);
 
         textSizeSeek = (SeekBar) findViewById(R.id.text_size_seek);
+        textAngleSeek = (SeekBar) findViewById(R.id.text_angle_seek);
         ringSizeSeek = (SeekBar) findViewById(R.id.ring_size_seek);
 
         //Define switches
@@ -115,6 +150,12 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         strokeSwitch = (Switch) findViewById(R.id.stroke_switch);
         smoothSwitch = (Switch) findViewById(R.id.smooth_switch);
         graySwitch = (Switch) findViewById(R.id.gray_switch);
+        reverseOrderSwitch = (Switch) findViewById(R.id.reverse_ring_order_switch);
+        showSecondsSwitch = (Switch) findViewById(R.id.show_seconds_switch);
+
+        donateButton = (Button) findViewById(R.id.donate_button);
+        if (bBoughtDonation)
+            donateButton.setVisibility(View.INVISIBLE);
 
         graphicsUpdateHandler.postDelayed(graphicsUpdateRunnable, 0);
 
@@ -127,8 +168,26 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         //Do this before we set listeners so we don't make unnecessary custom faces...
         updateUIFromSettings();
 
+        // Billing lib
+        String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr9lOZF0gMyuWeWY0WPl9lQbxcaSfBmbK6rKugnh6HhJkDo1OAM3z57stwfh79ZBDkum8bz0c4OlJQoHeP1fwKKhfHtALxKywliey7Oe2DZi/VQOGK/LpSam0+B8IAUJU3tx74/NBueLyer9xeuXtk1uc0SyVaqP9S8fSKCwpegmidp7QernYZa+GKsl53fIOeoZoUjkUmeidxux9u/D5Dl17IlXy55VK6FNwESGcywjxGvJdYVraCcH9lfWahQsYTJL46LwW/2wcziYJYBiNnPMQyRY0OCl8AjnoA9LL5/xCa6vZmPKTLBNmaovnWZl9iQ+PBDBsW2GgC7EOeG7jMwIDAQAB";
+        mHelper = new IabHelper(this, base64EncodedPublicKey);
+
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            @Override
+            public void onIabSetupFinished(IabResult result) {
+                if (!result.isSuccess()) {
+                    // uhh... issue here...
+                    Log.d(TAG, "Problem setting up billing: " + result);
+                }
+                //Otherwise it's working!
+            }
+        });
+
         //Once we're connected, send all our previously set settings...
         sendAllSettings();
+
+        //Call this before the event listeners, that way changes don't create a new custom ring set
+        updateUIFromSettings();
 
         pickFaceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -353,6 +412,30 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
+        textAngleSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                float calcDegrees = (progress/100.f) * 360;
+                calcDegrees = calcDegrees % 360;
+
+                watchView.faceDrawer.textAngle = calcDegrees;
+
+                saveCustomWatchFace();
+
+                sendAllSettings();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         ringSizeSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -376,11 +459,10 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        textSwitch.setOnClickListener(new View.OnClickListener() {
+        textSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
-
-                watchView.faceDrawer.bTextEnabled = textSwitch.isChecked();
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                watchView.faceDrawer.bTextEnabled = isChecked;
 
                 saveCustomWatchFace();
 
@@ -388,9 +470,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        militarySwitch.setOnClickListener(new View.OnClickListener() {
+        militarySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 watchView.faceDrawer.b24HourTime = militarySwitch.isChecked();
 
                 saveCustomWatchFace();
@@ -399,9 +481,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        strokeSwitch.setOnClickListener(new View.OnClickListener() {
+        strokeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 watchView.faceDrawer.bTextStroke = strokeSwitch.isChecked();
 
                 saveCustomWatchFace();
@@ -410,9 +492,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        smoothSwitch.setOnClickListener(new View.OnClickListener() {
+        smoothSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 watchView.faceDrawer.bShowMilli = smoothSwitch.isChecked();
 
                 saveCustomWatchFace();
@@ -421,14 +503,130 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             }
         });
 
-        graySwitch.setOnClickListener(new View.OnClickListener() {
+        graySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onClick(View v) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 watchView.faceDrawer.bGrayAmbient = graySwitch.isChecked();
 
                 saveCustomWatchFace();
                 sendAllSettings();
             }
+        });
+
+        reverseOrderSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                watchView.faceDrawer.bReverseRingOrder = reverseOrderSwitch.isChecked();
+
+                saveCustomWatchFace();
+
+                sendAllSettings();
+            }
+        });
+
+        showSecondsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                watchView.faceDrawer.bShowSeconds = showSecondsSwitch.isChecked();
+
+                saveCustomWatchFace();
+
+                sendAllSettings();
+            }
+        });
+
+        donateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Show the info about donating...
+                List productSKUs = new ArrayList();
+                productSKUs.add(SKU_DONATE);
+                ArrayList<String> skuList = new ArrayList<String>();
+                skuList.add(SKU_DONATE);
+                Bundle querySkus = new Bundle();
+                querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
+
+                // mService is null when we can't connect to Play Services...
+                /*if (mService != null){
+                    try {
+                        Bundle skuDetails = mService.getSkuDetails(3, getPackageName(), "inapp", querySkus);
+                        int response = skuDetails.getInt("RESPONSE_CODE");
+                        if (response == 0) {
+                            ArrayList<String> responseList = skuDetails.getStringArrayList("DETAILS_LIST");
+
+                            for (String thisResponse : responseList) {
+                                JSONObject object = new JSONObject(thisResponse);
+                                String sku = object.getString("productId");
+                                String price = object.getString("price");
+                                Log.d(TAG, "sku: "+sku+", price: "+price);
+                                Bundle buyIntentBundle = mService.getBuyIntent(3, getPackageName(),
+                                        sku, "inapp", "");
+                                final PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+
+                                // Don't start our billing intent until we get a second okay from the user
+                                AlertDialog.Builder donateBuilder = new AlertDialog.Builder(v.getContext());
+                                donateBuilder.setTitle(R.string.donate);
+                                donateBuilder.setMessage(R.string.donate_description);
+                                donateBuilder.setPositiveButton(R.string.donate, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        try {
+                                            startIntentSenderForResult(pendingIntent.getIntentSender(),
+                                                    DONATE_FLAG, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
+                                                    Integer.valueOf(0));
+                                        } catch (Exception e) {
+                                            Log.d(TAG, "Error starting donate intent " + e.getMessage());
+                                        }
+                                    }
+                                });
+                                donateBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                                AlertDialog donateDialog = donateBuilder.create();
+
+                                donateDialog.show();
+                            }
+                        }
+                    }
+                    catch (Exception e){
+                        Log.d(TAG, "Error getting details "+e.getMessage());
+                    }
+                }*/
+
+                mHelper.queryInventoryAsync(true, productSKUs, mQueryFinishedListener);
+            }
+
+            IabHelper.QueryInventoryFinishedListener mQueryFinishedListener = new IabHelper.QueryInventoryFinishedListener() {
+                @Override
+                public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+                    if (result.isFailure()){
+                        // Whoops.
+                        Log.d(TAG, "Failed to get inventory");
+                    }
+
+                    String donatePrice = inv.getSkuDetails(SKU_DONATE).getPrice();
+                    Log.d(TAG, "Got donate price: " + donatePrice);
+
+                    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+                        @Override
+                        public void onIabPurchaseFinished(IabResult result, Purchase info) {
+                            if (result.isFailure()) {
+                                Log.d(TAG, "Error purchasing: " + result);
+                                Toast.makeText(CustomizeFaceActivity.this, "Donation failed.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            else if (info.getSku().equals(SKU_DONATE)) {
+                                // They bought it, show a thank you toast!
+                                Toast.makeText(CustomizeFaceActivity.this, "Thank you so much for donating!", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    };
+
+                    showDonateDialog(mPurchaseFinishedListener);
+                }
+            };
+
         });
     }
 
@@ -486,6 +684,9 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     protected void onDestroy() {
         super.onDestroy();
         mGoogleApiClient.disconnect();
+        if (mHelper != null)
+            mHelper.dispose();
+        mHelper = null;
     }
 
     private void sendAllSettings(){
@@ -540,9 +741,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
     private View.OnClickListener watchClicked = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            LinearLayout linearView = null;
+            LinearLayout linearView;
             CanvasDrawnRingView clickedView = null;
-            String displayName = "";
 
             if (view instanceof LinearLayout)
             {
@@ -550,7 +750,6 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
                 if (linearView.getChildAt(0) instanceof CanvasDrawnRingView) {
                     clickedView = (CanvasDrawnRingView) linearView.getChildAt(0);
                 }
-                displayName = ((TextView)linearView.getChildAt(1)).getText().toString();
             }
 
             if (clickedView == null) {
@@ -586,9 +785,8 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
 
         sendAllSettings();
 
-        //If we aren't using a custom face...do nothing lol
-        if (watchView.faceDrawer.colorComboName.indexOf("Custom ") == -1){
-
+        if (!watchView.faceDrawer.colorComboName.contains("Custom ")){
+            //If we aren't using a custom face...do nothing lol
         }
         //If we just deleted the last custom ring, select RGB by default.
         else if (watchView.faceDrawer.customRings.isEmpty()) {
@@ -600,10 +798,16 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             // Since we just deleted one, we need to temporarily select something else
             // Otherwise our user could hit back and have an invalid face selected...
             // Select the next ring, or the last one, whatever's safest.
-            int tempSelection = Math.min(deleteIndex, watchView.faceDrawer.customRings.size()-1);
-            watchView.faceDrawer.colorComboName = "Custom " + (tempSelection + 1);
+            int customIndex = Math.min(deleteIndex, watchView.faceDrawer.customRings.size()-1);
+            watchView.faceDrawer.colorComboName = "Custom " + (customIndex + 1);
 
-            watchView.faceDrawer.applySettingsFromCustomRing(tempSelection);
+            //Reject this if it's out of bounds
+            if (customIndex >= watchView.faceDrawer.customRings.size())
+                return;
+
+            JsonParser parser = new JsonParser();
+            JsonObject customFace = (JsonObject) parser.parse(watchView.faceDrawer.customRings.get(customIndex));
+            watchView.faceDrawer.applySettingsFromCustomRing(customIndex);
             updateUIFromSettings();
         }
 
@@ -633,9 +837,15 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         militarySwitch.setChecked(watchView.faceDrawer.b24HourTime);
         smoothSwitch.setChecked(watchView.faceDrawer.bShowMilli);
         graySwitch.setChecked(watchView.faceDrawer.bGrayAmbient);
+        reverseOrderSwitch.setChecked(watchView.faceDrawer.bReverseRingOrder);
+        showSecondsSwitch.setChecked(watchView.faceDrawer.bShowSeconds);
 
         textSizeSeek.setProgress(watchView.faceDrawer.textSizePercent);
         ringSizeSeek.setProgress(watchView.faceDrawer.ringSizePercent);
+
+        //Convert our text angle back to a percent
+        int calcPercent = (int) Math.floor((watchView.faceDrawer.textAngle/360.f) * 100.f);
+        textAngleSeek.setProgress(calcPercent);
 
         if (textSwitch.isChecked()){
             textSwitch.setEnabled(true);
@@ -799,7 +1009,7 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
         if (bChangingRingPresets)
             return;
         // If we're editing a built in one, make a new face.
-        if (watchView.faceDrawer.colorComboName.indexOf("Custom ") == -1){
+        if (!watchView.faceDrawer.colorComboName.contains("Custom ")){
             watchView.faceDrawer.colorComboName = "Custom "+(watchView.faceDrawer.customRings.size()+1);
             watchView.faceDrawer.addUpdateCustomRing(this, watchView.faceDrawer.customRings.size());
         }
@@ -808,6 +1018,30 @@ public class CustomizeFaceActivity extends Activity implements GoogleApiClient.C
             int customIndex = Integer.parseInt(watchView.faceDrawer.colorComboName.split("Custom ")[1])-1;
             watchView.faceDrawer.addUpdateCustomRing(this, customIndex);
         }
+    }
+
+    private void showDonateDialog(final IabHelper.OnIabPurchaseFinishedListener finishedListener){
+        // Don't start our billing intent until we get a second okay from the user
+        AlertDialog.Builder donateBuilder = new AlertDialog.Builder(this);
+        donateBuilder.setTitle(R.string.donate);
+        donateBuilder.setMessage(R.string.donate_description);
+        donateBuilder.setPositiveButton(R.string.donate, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                mHelper.launchPurchaseFlow(CustomizeFaceActivity.this, SKU_DONATE, 10001, finishedListener, nextSessionId());
+            }
+        });
+        donateBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog donateDialog = donateBuilder.create();
+
+        donateDialog.show();
+    }
+
+    public String nextSessionId() {
+        return new BigInteger(130, random).toString(32);
     }
 
 

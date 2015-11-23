@@ -83,12 +83,6 @@
             android:padding="10dp"
             android:orientation="vertical">
 
-            <!--<Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/set_custom"
-                android:id="@+id/changeCustomFace"/>-->
-
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -262,6 +256,16 @@
                 android:id="@+id/military_switch" />
 
             <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/text_angle"/>
+
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/text_angle_seek"/>
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/text_size"/>
@@ -303,7 +307,34 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/ring_size_seek" />
 
+            <Switch
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reverse_ring_order"
+                android:id="@+id/reverse_ring_order_switch"/>
 
+            <Switch
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/show_seconds"
+                android:id="@+id/show_seconds_switch"/>
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/donate"
+                android:id="@+id/donate_text_View"
+                style="?android:listSeparatorTextViewStyle"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/donate"
+                android:id="@+id/donate_button"
+                />
         </LinearLayout>
 
     </ScrollView>

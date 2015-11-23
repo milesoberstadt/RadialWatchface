@@ -38,8 +38,19 @@
     <string name="sm_sec">Smooth Seconds Animation</string>
     <string name="gray_ambient">Grayscale on Ambient</string>
 
+    <string name="donate">Donate</string>
+
     <string name="add_new">Add New Watchface</string>
 
     <string name="ring_size">Ring Size</string>
+
+    <string name="reverse_ring_order">Reverse Ring Order</string>
+    <string name="show_seconds">Show Seconds Ring</string>
+
+    <string name="text_angle">Text Angle</string>
+
+    <string name="donate_description">Thanks for considering donating, I hope you\'ve enjoyed my watch face.
+    Please note that donating does not unlock extra features (at this time), it\'s completely voluntary and only exists because some users were looking for a way to donate. </string>
+    <string name="cancel">Cancel</string>
 
 </resources>

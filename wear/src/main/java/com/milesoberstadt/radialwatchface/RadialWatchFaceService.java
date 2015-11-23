@@ -233,6 +233,10 @@ public class RadialWatchFaceService extends CanvasWatchFaceService {
                         else
                             faceDrawer.applySettingsFromPresetRing(getApplicationContext());
                     }
+                    if (dm.containsKey("reverseRingOrder"))
+                        faceDrawer.bReverseRingOrder = dm.getBoolean("reverseRingOrder", faceDrawer.bReverseRingOrder);
+                    if (dm.containsKey("showSeconds"))
+                        faceDrawer.bShowSeconds = dm.getBoolean("showSeconds", faceDrawer.bShowSeconds);
                 }
             }
 
